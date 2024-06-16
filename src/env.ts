@@ -1,6 +1,8 @@
 import { createEnv } from "@t3-oss/env-nextjs"
+import { configDotenv } from "dotenv"
 import { z } from "zod"
 
+configDotenv({ path: [".env.local"], debug: true })
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -24,9 +26,9 @@ export const env = createEnv({
    * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
    * middlewares) or client-side so we need to destruct manually.
    */
-  runtimeEnv: {
-    POSTGRES_URL: process.env.POSTGRES_URL,
-    NODE_ENV: process.env.NODE_ENV
+  experimental__runtimeEnv: {
+    // POSTGRES_URL: process.env.POSTGRES_URL,
+    // NODE_ENV: process.env.NODE_ENV
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

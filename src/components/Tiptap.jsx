@@ -53,20 +53,20 @@ const Tiptap = () => {
 
   return (
     <div>
-      <div>
+      <div className="container">
         <div className="control-group">
           <div className="button-group">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={editor.isActive("bold") ? "is-active" : ""}
             >
-              Toggle bold
+              bold
             </button>
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={editor.isActive("italic") ? "is-active" : ""}
             >
-              Toggle italic
+              italic
             </button>
             <button onClick={setLink} className={editor.isActive("link") ? "is-active" : ""}>
               Set link
@@ -75,19 +75,19 @@ const Tiptap = () => {
               onClick={() => editor.chain().focus().toggleStrike().run()}
               className={editor.isActive("strike") ? "is-active" : ""}
             >
-              Toggle strike
+              strike
             </button>
             <button
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               className={editor.isActive("underline") ? "is-active" : ""}
             >
-              Toggle underline
+              underline
             </button>
             <button
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               className={editor.isActive("codeBlock") ? "is-active" : ""}
             >
-              Toggle code block
+              code block
             </button>
             <button
               onClick={() => editor.chain().focus().setCodeBlock().run()}
@@ -96,34 +96,10 @@ const Tiptap = () => {
               Set code block
             </button>
             <button
-              onClick={() => editor.chain().focus().unsetBold().run()}
-              disabled={!editor.isActive("bold")}
-            >
-              Unset bold
-            </button>
-            <button
-              onClick={() => editor.chain().focus().unsetItalic().run()}
-              disabled={!editor.isActive("italic")}
-            >
-              Unset italic
-            </button>
-            <button
               onClick={() => editor.chain().focus().unsetLink().run()}
               disabled={!editor.isActive("link")}
             >
               Unset link
-            </button>
-            <button
-              onClick={() => editor.chain().focus().unsetStrike().run()}
-              disabled={!editor.isActive("strike")}
-            >
-              Unset strike
-            </button>
-            <button
-              onClick={() => editor.chain().focus().unsetUnderline().run()}
-              disabled={!editor.isActive("underline")}
-            >
-              Unset underline
             </button>
           </div>
         </div>

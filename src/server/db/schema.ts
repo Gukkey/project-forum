@@ -10,6 +10,9 @@ import { pgTableCreator, text, timestamp, uniqueIndex, uuid, varchar } from "dri
 
 export const createTable = pgTableCreator((name) => `example-project-1_${name}`)
 
+// TODO: Find a way to make updatedAt update its timestamp when a record is updated.
+// .$onUpdate(() => new Date()) and .$onUpdate(() => sql`CURRENT_TIMESTAMP`), didnt work
+
 export const sections = createTable(
   "section",
   {
@@ -22,6 +25,8 @@ export const sections = createTable(
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => new Date())
   },
   (sections) => {
     return {
@@ -41,8 +46,12 @@ export const topics = createTable(
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt"),
-    sectionId: uuid("section_id").references(() => sections.id)
+    updatedAt: timestamp("updatedAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    sectionId: uuid("section_id")
+      .references(() => sections.id)
+      .notNull()
   },
   (topics) => {
     return {
@@ -58,18 +67,33 @@ export const discussionThreads = createTable(
       .default(sql`gen_random_uuid()`)
       .unique()
       .primaryKey(),
-    name: varchar("name", { length: 1024 }).notNull(),
+    title: varchar("name", { length: 1024 }).notNull(),
     content: text("content").notNull(),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt"),
-    sectionId: uuid("section_id").references(() => sections.id),
-    topicId: uuid("topic_id").references(() => topics.id)
+    updatedAt: timestamp("updatedAt")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    sectionId: uuid("section_id")
+      .references(() => sections.id)
+      .notNull(),
+    topicId: uuid("topic_id")
+      .references(() => topics.id)
+      .notNull()
   },
   (discussionThreads) => {
     return {
-      discussionThreadsIdx: uniqueIndex("discussion_thread_idx").on(discussionThreads.name)
+      discussionThreadsIdx: uniqueIndex("discussion_thread_idx").on(discussionThreads.title)
     }
   }
 )
+
+export type InsertSection = typeof sections.$inferInsert
+export type SelectSection = typeof sections.$inferSelect
+
+export type InsertTopic = typeof topics.$inferInsert
+export type SelectTopic = typeof topics.$inferSelect
+
+export type InsertDiscussionThreads = typeof discussionThreads.$inferInsert
+export type SelectDiscussionThreads = typeof discussionThreads.$inferSelect

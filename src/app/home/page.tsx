@@ -38,8 +38,18 @@
 import { Section } from "./Section"
 // import { db } from "@projectforum/server/db"
 import { getAllSections } from "@projectforum/server/db/queries"
+import { createSection } from "@projectforum/server/db/queries"
 
-export default async function HomePage() {
+// Create a new section
+
+export default async function HomePage(props: { name: any }) {
+  const newSection = {
+    name: props.name,
+    createdAt: new Date(),
+    updatedAt: null
+  }
+
+  await createSection(newSection)
   const sections = await getAllSections()
   return <Section sections={sections} />
 }

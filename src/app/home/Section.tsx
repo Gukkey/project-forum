@@ -1,4 +1,6 @@
 "use client"
+import Link from "next/link"
+import React from "react"
 
 interface ThreadType {
   id: string
@@ -25,29 +27,41 @@ export const Section = ({ sections }: { sections?: SectionType[] }) => {
   const handleSectionClick = () => {}
 
   return (
-    <div>
-      <h1>Sections</h1>
-      {sections?.map((section) => (
-        <div key={section.id}>
-          <h2 onClick={handleSectionClick}>{section.name}</h2>
-          {section.topics.length === 0 && <p>No topics found</p>}
-          <ul>
-            {section.topics.map((topic) => (
-              <li key={topic.id}>
-                {topic.name} - Created At: {topic.createdAt.toLocaleDateString()}
-                <ul>
-                  {topic.threads.length === 0 && <li>No threads found</li>}
-                  {topic.threads.map((thread) => (
-                    <li key={thread.id}>
-                      {thread.title} - Created At: {thread.createdAt.toLocaleDateString()}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+    <div className="p-4 overflow-x-auto">
+      <h1 className="text-2xl font-bold text-left mb-6">Sections</h1>
+      <table className="min-w-full table-auto">
+        {sections?.map((section) => (
+          <React.Fragment key={section.id}>
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-left text-xl" onClick={handleSectionClick}>
+                  {section.name}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {section.topics.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-2">No topics found</td>
+                </tr>
+              ) : (
+                section.topics.map((topic) => (
+                  <tr key={topic.id} className="border-t">
+                    <td className="px-4 py-2">
+                      <Link
+                        href={`home/page/${topic.id}`}
+                        className="text-blue-400 hover:underline"
+                      >
+                        {topic.name}
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </React.Fragment>
+        ))}
+      </table>
     </div>
   )
 }

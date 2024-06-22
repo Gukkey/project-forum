@@ -48,10 +48,7 @@ export const Section = ({ sections }: { sections?: SectionType[] }) => {
                 section.topics.map((topic) => (
                   <tr key={topic.id} className="border-t">
                     <td className="px-4 py-2">
-                      <Link
-                        href={`home/page/${topic.id}`}
-                        className="text-blue-400 hover:underline"
-                      >
+                      <Link href={`home/${topic.id}`} className="text-blue-400 hover:underline">
                         {topic.name}
                       </Link>
                     </td>

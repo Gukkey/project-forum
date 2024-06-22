@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm"
-import { pgTableCreator, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  pgTableCreator,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar
+} from "drizzle-orm/pg-core"
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -21,9 +29,7 @@ export const sections = createTable(
       .unique()
       .primaryKey(),
     name: varchar("name", { length: 256 }).notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
     updatedAt: timestamp("updatedAt")
       .default(sql`CURRENT_TIMESTAMP`)
       .$onUpdate(() => new Date())
@@ -43,9 +49,7 @@ export const topics = createTable(
       .unique()
       .primaryKey(),
     name: varchar("name", { length: 256 }).notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
     updatedAt: timestamp("updatedAt")
       .default(sql`CURRENT_TIMESTAMP`)
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
@@ -69,9 +73,7 @@ export const discussionThreads = createTable(
       .primaryKey(),
     title: varchar("name", { length: 1024 }).notNull(),
     content: text("content").notNull(),
-    createdAt: timestamp("created_at")
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
     updatedAt: timestamp("updatedAt")
       .default(sql`CURRENT_TIMESTAMP`)
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
@@ -89,6 +91,17 @@ export const discussionThreads = createTable(
   }
 )
 
+export const cronJobLogs = createTable("cron_job_logs", {
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .unique()
+    .primaryKey(),
+  log: text("logs"),
+  animeAdded: boolean("anime_added").default(false),
+  gotError: boolean("got_error").default(false),
+  nothingHappened: boolean("nothing_happened").default(true)
+})
+
 export type InsertSection = typeof sections.$inferInsert
 export type SelectSection = typeof sections.$inferSelect
 
@@ -97,3 +110,6 @@ export type SelectTopic = typeof topics.$inferSelect
 
 export type InsertDiscussionThreads = typeof discussionThreads.$inferInsert
 export type SelectDiscussionThreads = typeof discussionThreads.$inferSelect
+
+export type InsertCronJobLogs = typeof cronJobLogs.$inferInsert
+export type SelectCronJobLogs = typeof cronJobLogs.$inferSelect

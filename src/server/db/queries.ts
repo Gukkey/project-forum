@@ -1,12 +1,14 @@
 import { desc, eq } from "drizzle-orm"
 import { db } from "."
 import {
+  InsertCronJobLogs,
   InsertDiscussionThreads,
   InsertSection,
   InsertTopic,
   SelectDiscussionThreads,
   SelectSection,
   SelectTopic,
+  cronJobLogs,
   discussionThreads,
   sections,
   topics
@@ -51,4 +53,8 @@ export async function getLatestDiscussionThread(id: SelectTopic["id"]) {
 
 export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
+}
+
+export async function createCronJobs(data: InsertCronJobLogs) {
+  return await db.insert(cronJobLogs).values(data)
 }

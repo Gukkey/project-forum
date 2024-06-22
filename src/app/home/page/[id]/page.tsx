@@ -1,4 +1,5 @@
 import { getAllDiscussionThreads } from "@projectforum/server/db/queries"
+import Link from "next/link"
 import React from "react"
 
 export default async function DynamicPage({ params }: { params: { id: string } }) {
@@ -13,7 +14,9 @@ export default async function DynamicPage({ params }: { params: { id: string } }
           <React.Fragment key={thread.id}>
             <thead>
               <tr>
-                <th className="px-4 py-2 text-left text-xl">{thread.title}</th>
+                <Link href={`/home/page/${params.id}/${thread.id}`}>
+                  <th className="px-4 py-2 text-left text-xl">{thread.title}</th>
+                </Link>
               </tr>
             </thead>
             <tbody>

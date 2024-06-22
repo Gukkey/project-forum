@@ -4,6 +4,7 @@ import {
   InsertDiscussionThreads,
   InsertSection,
   InsertTopic,
+  SelectDiscussionThreads,
   SelectSection,
   SelectTopic,
   discussionThreads,
@@ -46,4 +47,8 @@ export async function getLatestDiscussionThread(id: SelectTopic["id"]) {
     .where(eq(discussionThreads.topicId, id))
     .orderBy(desc(discussionThreads.updatedAt))
     .limit(1)
+}
+
+export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
+  return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
 }

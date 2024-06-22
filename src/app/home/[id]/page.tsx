@@ -14,7 +14,7 @@ export default async function DynamicPage({ params }: { params: { id: string } }
           <React.Fragment key={thread.id}>
             <thead>
               <tr>
-                <Link href={`/home/page/${params.id}/${thread.id}`}>
+                <Link href={`/home/${params.id}/${thread.id}`}>
                   <th className="px-4 py-2 text-left text-xl">{thread.title}</th>
                 </Link>
               </tr>

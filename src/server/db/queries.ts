@@ -57,7 +57,7 @@ export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
 }
 
-export async function createCronJobs(data: InsertCronJobLogs) {
+export async function createCronJobLogs(data: InsertCronJobLogs) {
   return await db.insert(cronJobLogs).values(data)
 }
 

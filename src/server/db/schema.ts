@@ -1,13 +1,5 @@
 import { sql } from "drizzle-orm"
-import {
-  pgTableCreator,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-  boolean
-} from "drizzle-orm/pg-core"
+import { pgTableCreator, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core"
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -115,17 +107,6 @@ export const users = createTable(
     }
   }
 )
-
-export const cronJobLogs = createTable("cron_job_logs", {
-  id: uuid("id")
-    .default(sql`gen_random_uuid()`)
-    .unique()
-    .primaryKey(),
-  log: text("logs"),
-  animeAdded: boolean("anime_added").default(false),
-  gotError: boolean("got_error").default(false),
-  nothingHappened: boolean("nothing_happened").default(true)
-})
 
 export type InsertSection = typeof sections.$inferInsert
 export type SelectSection = typeof sections.$inferSelect

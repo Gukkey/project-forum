@@ -4,12 +4,14 @@ import {
   InsertDiscussionThreads,
   InsertSection,
   InsertTopic,
+  InsertUser,
   SelectDiscussionThreads,
   SelectSection,
   SelectTopic,
   discussionThreads,
   sections,
-  topics
+  topics,
+  users
 } from "./schema"
 
 export async function createSection(data: InsertSection) {
@@ -51,4 +53,8 @@ export async function getLatestDiscussionThread(id: SelectTopic["id"]) {
 
 export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
+}
+
+export async function createUserAfterSignUp(data: InsertUser) {
+  await db.insert(users).values(data)
 }

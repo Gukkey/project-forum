@@ -1,5 +1,13 @@
 import { sql } from "drizzle-orm"
-import { pgTableCreator, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core"
+import {
+  pgTableCreator,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+  boolean
+} from "drizzle-orm/pg-core"
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -80,6 +88,9 @@ export const discussionThreads = createTable(
       .notNull(),
     topicId: uuid("topic_id")
       .references(() => topics.id)
+      .notNull(),
+    userId: varchar("user_id", { length: 50 })
+      .references(() => users.id)
       .notNull()
   },
   (discussionThreads) => {
@@ -89,6 +100,33 @@ export const discussionThreads = createTable(
   }
 )
 
+export const users = createTable(
+  "users",
+  {
+    id: varchar("id", { length: 50 }).notNull().unique().primaryKey(),
+    name: text("name"),
+    role: text("role").$type<"admin" | "member" | "mod">(),
+    email: text("email").notNull(),
+    imageUrl: text("image_url")
+  },
+  (users) => {
+    return {
+      usersIdx: uniqueIndex("users_idx").on(users.id)
+    }
+  }
+)
+
+export const cronJobLogs = createTable("cron_job_logs", {
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .unique()
+    .primaryKey(),
+  log: text("logs"),
+  animeAdded: boolean("anime_added").default(false),
+  gotError: boolean("got_error").default(false),
+  nothingHappened: boolean("nothing_happened").default(true)
+})
+
 export type InsertSection = typeof sections.$inferInsert
 export type SelectSection = typeof sections.$inferSelect
 
@@ -97,3 +135,5 @@ export type SelectTopic = typeof topics.$inferSelect
 
 export type InsertDiscussionThreads = typeof discussionThreads.$inferInsert
 export type SelectDiscussionThreads = typeof discussionThreads.$inferSelect
+
+export type InsertUser = typeof users.$inferInsert

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "users_idx" ON "example-project-1_users" USING btree ("id");

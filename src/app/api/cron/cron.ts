@@ -1,91 +1,82 @@
+import { discussionThreads } from "@projectforum/server/db/schema"
 import { Redis } from "@upstash/redis"
 import { CronJob } from "cron"
-import { addAnimeInRedis, logCronJob } from "./helper"
-import { fetchAnime } from "./anilist"
-import { createDiscussionThread } from "@projectforum/server/db/queries"
-import { discussionThreads } from "@projectforum/server/db/schema"
+import { addAnimeInRedis } from "./helper"
 import { db } from "@projectforum/server/db"
-import { title } from "process"
-import { eq } from "drizzle-orm"
+import { fetchAnime, fetchNextEpisodeAiringAt } from "./anilist"
+import { logCronJob } from "./helper"
 
-export const fetchCache = "force-no-store"
+export const runtime = "edge"
 
-const anime: number[] = process.env.CRON_JOB_ANIME_ID_ARRAY?.split(",").map(Number) || []
+const anime = [21, 153288, 966, 163139, 235]
 
-// Initialize Redis outside of the job function
-const redis = new Redis({
-  url: process.env.REDIS_URL,
-  token: process.env.REDIS_TOKEN
-})
+const job = new CronJob("*/10 * * * *", () => {
+  // Define a object for our Redis DB
+  const redis = new Redis({
+    url: process.env.REDIS_URL,
+    token: process.env.REDIS_TOKEN
+  })
 
-export const job = new CronJob("*/10 * * * *", async () => {
-  try {
-    // Check and add anime to Redis
-    anime.map(async (animeId) => {
-      const exists = await redis.exists(animeId.toString(10))
-      if (!exists) {
-        addAnimeInRedis(animeId)
-      }
-    })
+  // Check whether all anime in Anime[] is present in redis
+  // if they dont, add them in redis
+  anime.forEach((anime) => {
+    if (!redis.exists(anime.toString(10))) {
+      addAnimeInRedis(anime)
+    }
+  })
 
-    const currentTime = Math.floor(new Date().getTime() / 1000.0) // Converting seconds to milliseconds
-    // await Promise.all(
-    anime.map(async (animeId, idx) => {
-      const value = await redis
-        .get(animeId.toString(10))
-        .catch((err) => `${err instanceof Error ? err.stack : err}`)
+  // Check whether an (Unixstamp) value is 10 minutes or less old than current time,
+  // since it is a cron job that is executed every 10 minutes,
+  // every 5 minutes we check whether a value has passed current time and if they do we make a discussion thread,
+  // and then update the value in the key
+
+  const currentTime = Date.now()
+  anime.forEach((anime) => {
+    redis.get(anime.toString(10)).then((value) => {
       if (value === null) {
-        logCronJob(`${animeId} returned NaN value ${value} index: ${idx}`)
+        logCronJob(`${anime} returned NaN value ${value}`)
       }
 
-      const timestamp = Number(value)
-      const data = await fetchAnime(animeId)
+      const timestamp = value as number
 
-      if (timestamp > currentTime && timestamp - currentTime <= 10 * 60) {
-        console.log(`${timestamp} ${currentTime}`)
-        logCronJob(`timestamp: ${timestamp} currentTime: ${currentTime} idx: ${idx}`)
-        try {
-          const animeName = data.data.Media.title.english
-          const episode = data.data.Media.nextAiringEpisode.episode
-          const post = {
-            title: `${animeName} - EPISODE ${episode} DISCUSSION`,
-            content: `This thread is automated`,
-            sectionId: process.env.CRON_JOB_SECTION_ID as string,
-            topicId: process.env.CRON_JOB_TOPIC_ID as string,
-            userId: process.env.CRON_JOB_TOPIC_ID as string
-          }
+      if (Math.abs(timestamp - currentTime) <= 600) {
+        fetchAnime(anime)
+          .then((data) => {
+            const episode = data.data.Media.nextAiringEpisode.airingAt
+            const animeName = data.data.Media.title
+            const post = {
+              title: `${animeName} ${episode} - EPISODE DISCUSSION`,
+              content: `This thread is automated`,
+              sectionId: process.env.CRON_JOB_SECTION_ID,
+              topicId: process.env.CRON_JOB_TOPIC_ID
+            }
 
-          const nextEpisode = episode + 1
+            const nextAiringEpisode = episode + 1
 
-          const checkForTitle = await db
-            .select()
-            .from(discussionThreads)
-            .where(eq(discussionThreads.title, title))
-
-          if (checkForTitle.length > 0) {
-            logCronJob(`duplicate post ${title} index: ${idx}`)
-          }
-
-          createDiscussionThread(post).then(async () => {
-            const nextEpisodeData = await fetchAnime(nextEpisode)
-            await redis
-              .set(animeId.toString(10), data.data.Media.nextAiringEpisode.airingAt)
+            db.insert(discussionThreads)
+              .values(post as any)
+              .then(() => {
+                fetchNextEpisodeAiringAt(nextAiringEpisode).then((data) => {
+                  redis
+                    .set(anime.toString(10), data.data.nextAiringEpisode.airingAt)
+                    .catch((err) => {
+                      console.log(err)
+                    })
+                  logCronJob(`A new episode thread for ${post.title} has been released...`)
+                })
+              })
               .catch((err) => {
-                logCronJob(
-                  `${err instanceof Error ? err.stack : err} redis key value: ${animeId.toString(10)} ${nextEpisodeData.data.Media.nextAiringEpisode.airingAt} index: ${idx}`
-                )
+                logCronJob(`Caught err: ${err}`)
               })
           })
-          logCronJob(`${timestamp - currentTime} idx: ${idx}`)
-          logCronJob(`A new episode thread for ${post.title} has been released... index: ${idx}`)
-        } catch (err) {
-          logCronJob(`${err instanceof Error ? err.stack : err} index: ${idx}`)
-        }
-        console.log(`${timestamp} ${currentTime}`)
+          .catch((err) => {
+            logCronJob(`Caught err: ${err}`)
+          })
       }
     })
-    logCronJob(`Cron job completed, no anime is added.`)
-  } catch (err) {
-    logCronJob(`${err instanceof Error ? err.stack : err}`)
-  }
+  })
+
+  logCronJob(`Nothing happened`)
 })
+
+job.start()

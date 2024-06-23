@@ -80,11 +80,30 @@ export const discussionThreads = createTable(
       .notNull(),
     topicId: uuid("topic_id")
       .references(() => topics.id)
+      .notNull(),
+    userId: varchar("user_id", { length: 50 })
+      .references(() => users.id)
       .notNull()
   },
   (discussionThreads) => {
     return {
       discussionThreadsIdx: uniqueIndex("discussion_thread_idx").on(discussionThreads.title)
+    }
+  }
+)
+
+export const users = createTable(
+  "users",
+  {
+    id: varchar("id", { length: 50 }).notNull().unique().primaryKey(),
+    name: text("name"),
+    role: text("role").$type<"admin" | "member" | "mod">(),
+    email: text("email").notNull(),
+    imageUrl: text("image_url")
+  },
+  (users) => {
+    return {
+      usersIdx: uniqueIndex("users_idx").on(users.id)
     }
   }
 )
@@ -97,3 +116,5 @@ export type SelectTopic = typeof topics.$inferSelect
 
 export type InsertDiscussionThreads = typeof discussionThreads.$inferInsert
 export type SelectDiscussionThreads = typeof discussionThreads.$inferSelect
+
+export type InsertUser = typeof users.$inferInsert

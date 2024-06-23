@@ -5,7 +5,7 @@ export default {
   schema: "./src/server/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: env.POSTGRES_URL
+    url: env.NODE_ENV == "development" ? env.POSTGRES_URL_LOCAL : env.POSTGRES_URL
   },
   tablesFilter: ["example-project-1_*"]
 } satisfies Config

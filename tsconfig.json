@@ -18,6 +18,7 @@
       }
     ],
     "paths": {
+      "@shadcn/*": ["./src/components/shadcn/*"],
       "@projectforum/*": ["./src/*"]
     }
   },

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter, Montserrat } from "next/font/google"
 
 import "./globals.css"
+import { ClerkProvider } from "@clerk/nextjs"
 
 const inter = Inter({ subsets: ["latin"] })
 const montserrat = Montserrat({ subsets: ["latin-ext"] })
@@ -17,8 +18,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} ${montserrat.className}`}>{children}</body>
+    <html lang="en" className="dark">
+      <ClerkProvider>
+        <body className={`${inter.className} ${montserrat.className}`}>{children}</body>
+      </ClerkProvider>
     </html>
   )
 }

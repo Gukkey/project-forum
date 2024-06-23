@@ -82,6 +82,9 @@ export const discussionThreads = createTable(
       .notNull(),
     topicId: uuid("topic_id")
       .references(() => topics.id)
+      .notNull(),
+    userId: varchar("user_id", { length: 50 })
+      .references(() => users.id)
       .notNull()
   },
   (discussionThreads) => {
@@ -90,6 +93,7 @@ export const discussionThreads = createTable(
     }
   }
 )
+
 
 export const cronJobLogs = createTable("cron_job_logs", {
   id: uuid("id")
@@ -102,6 +106,22 @@ export const cronJobLogs = createTable("cron_job_logs", {
   nothingHappened: boolean("nothing_happened").default(true)
 })
 
+export const users = createTable(
+  "users",
+  {
+    id: varchar("id", { length: 50 }).notNull().unique().primaryKey(),
+    name: text("name"),
+    role: text("role").$type<"admin" | "member" | "mod">(),
+    email: text("email").notNull(),
+    imageUrl: text("image_url")
+  },
+  (users) => {
+    return {
+      usersIdx: uniqueIndex("users_idx").on(users.id)
+    }
+  }
+)
+
 export type InsertSection = typeof sections.$inferInsert
 export type SelectSection = typeof sections.$inferSelect
 
@@ -113,3 +133,6 @@ export type SelectDiscussionThreads = typeof discussionThreads.$inferSelect
 
 export type InsertCronJobLogs = typeof cronJobLogs.$inferInsert
 export type SelectCronJobLogs = typeof cronJobLogs.$inferSelect
+
+export type InsertUser = typeof users.$inferInsert
+

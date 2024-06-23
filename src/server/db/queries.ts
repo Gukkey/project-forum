@@ -5,13 +5,15 @@ import {
   InsertDiscussionThreads,
   InsertSection,
   InsertTopic,
+  InsertUser,
   SelectDiscussionThreads,
   SelectSection,
   SelectTopic,
   cronJobLogs,
   discussionThreads,
   sections,
-  topics
+  topics,
+  users
 } from "./schema"
 
 export async function createSection(data: InsertSection) {
@@ -57,4 +59,8 @@ export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
 
 export async function createCronJobs(data: InsertCronJobLogs) {
   return await db.insert(cronJobLogs).values(data)
+}
+
+export async function createUserAfterSignUp(data: InsertUser) {
+  await db.insert(users).values(data)
 }

@@ -1,11 +1,12 @@
 import { type Config } from "drizzle-kit"
 import { env } from "@projectforum/env"
 
+console.log(env.POSTGRES_URL)
 export default {
   schema: "./src/server/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: env.POSTGRES_URL
+    url: env.NODE_ENV == "development" ? env.POSTGRES_URL_LOCAL : env.POSTGRES_URL
   },
   tablesFilter: ["example-project-1_*"]
 } satisfies Config

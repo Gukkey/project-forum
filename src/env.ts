@@ -2,14 +2,17 @@ import { createEnv } from "@t3-oss/env-nextjs"
 import { configDotenv } from "dotenv"
 import { z } from "zod"
 
-configDotenv({ path: [".env.local"], debug: true })
+configDotenv({ path: [".env.local"] })
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars.
    */
   server: {
+    USE_LOCAL_DB: z.enum(["true", "false"]).default("true"),
     POSTGRES_URL: z.string().url(),
+    POSTGRES_URL_LOCAL: z.string().url(),
+    WEBHOOK_SECRET: z.string(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development")
   },
 

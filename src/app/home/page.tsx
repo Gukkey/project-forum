@@ -1,7 +1,7 @@
 import { Section } from "./Section"
 import { getAllSections, getAllTopics } from "@projectforum/server/db/queries"
 import { getAllDiscussionThreads } from "@projectforum/server/db/queries"
-import SectionForm from "./SectionForm"
+// import SectionForm from "./SectionForm"
 
 export default async function HomePage() {
   const sections = await getAllSections()
@@ -23,7 +23,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <SectionForm />
+      {/* <SectionForm /> */}
       <Section sections={sectionsWithTopicsAndThreads} />
     </div>
   )

@@ -3,6 +3,7 @@ import { Inter, Montserrat } from "next/font/google"
 
 import "./globals.css"
 import { ClerkProvider } from "@clerk/nextjs"
+import { dark } from "@clerk/themes"
 
 const inter = Inter({ subsets: ["latin"] })
 const montserrat = Montserrat({ subsets: ["latin-ext"] })
@@ -19,7 +20,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <ClerkProvider>
+      <ClerkProvider
+        appearance={{
+          baseTheme: dark,
+          variables: {
+            colorBackground: "hsl(223 47% 11%)",
+            colorInputBackground: "hsl(216 34% 17%)"
+          }
+        }}
+      >
         <body className={`${inter.className} ${montserrat.className}`}>{children}</body>
       </ClerkProvider>
     </html>

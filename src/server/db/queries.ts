@@ -57,6 +57,10 @@ export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
 }
 
+export async function getServerId(id: SelectTopic["id"]) {
+  return await db.select({ sectionId: topics.sectionId }).from(topics).where(eq(topics.id, id))
+}
+
 export async function createCronJobLogs(data: InsertCronJobLogs) {
   return await db.insert(cronJobLogs).values(data)
 }

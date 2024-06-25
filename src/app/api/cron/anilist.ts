@@ -19,32 +19,15 @@ const FETCH_ANIME = gql`
       }
       nextAiringEpisode {
         airingAt
-        timeUntilAiring
         episode
       }
     }
   }
 `
 
-const FETCH_NEXT_EPISODE_AIRING_AT = gql`
-query fetch_next_episode_airing_at($id: Int) {
-    nextAiringEpisode($episode: Int) {
-      airingAt
-    }
-  }
-`
 export async function fetchAnime(id: number): Promise<ApolloQueryResult<any>> {
   return await client.query({
     query: FETCH_ANIME,
     variables: { id: id }
-  })
-}
-
-export async function fetchNextEpisodeAiringAt(
-  nextEpisodeId: number
-): Promise<ApolloQueryResult<any>> {
-  return client.query({
-    query: FETCH_NEXT_EPISODE_AIRING_AT,
-    variables: { id: nextEpisodeId }
   })
 }

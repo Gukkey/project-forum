@@ -7,7 +7,6 @@ import { discussionThreads } from "@projectforum/server/db/schema"
 import { db } from "@projectforum/server/db"
 import { title } from "process"
 import { eq } from "drizzle-orm"
-// import { NextResponse } from "next/server"
 
 export const fetchCache = "force-no-store"
 
@@ -29,7 +28,7 @@ export const job = new CronJob("*/10 * * * *", async () => {
       }
     })
 
-    const currentTime = Date.now()
+    const currentTime = Math.floor(new Date().getTime() / 1000.0) // Converting seconds to milliseconds
     // await Promise.all(
     anime.map(async (animeId, idx) => {
       const value = await redis
@@ -42,7 +41,7 @@ export const job = new CronJob("*/10 * * * *", async () => {
       const timestamp = Number(value)
       const data = await fetchAnime(animeId)
 
-      if (timestamp - currentTime <= 10 * 60 * 100 && timestamp - currentTime >= 0) {
+      if (timestamp > currentTime && timestamp - currentTime <= 10 * 60) {
         console.log(`${timestamp} ${currentTime}`)
         logCronJob(`timestamp: ${timestamp} currentTime: ${currentTime} idx: ${idx}`)
         try {
@@ -82,10 +81,10 @@ export const job = new CronJob("*/10 * * * *", async () => {
         } catch (err) {
           logCronJob(`${err instanceof Error ? err.stack : err} index: ${idx}`)
         }
+        console.log(`${timestamp} ${currentTime}`)
       }
     })
-    // )
-    logCronJob(`Cron job completed index:`)
+    logCronJob(`Cron job completed, no anime is added.`)
   } catch (err) {
     logCronJob(`${err instanceof Error ? err.stack : err}`)
   }

@@ -23,7 +23,7 @@ export async function generateInviteCode(
   }
 
   const checkIfSet = await redis.set(inviteCode, role)
-  const isExpiredSet = await redis.expire(inviteCode, 3000)
+  const isExpiredSet = await redis.expire(inviteCode, 7200)
 
   let returnJson: InviteCodeReturnJsonSuccess | InviteCodeReturnJsonFailure = {
     isInviteCodeGenerated: false

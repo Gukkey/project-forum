@@ -23,6 +23,7 @@ export async function createTopic(data: InsertTopic) {
 }
 
 export async function createDiscussionThread(data: InsertDiscussionThreads) {
+  console.log(data)
   await db.insert(discussionThreads).values(data)
 }
 
@@ -53,6 +54,10 @@ export async function getLatestDiscussionThread(id: SelectTopic["id"]) {
 
 export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
+}
+
+export async function getSectionId(id: SelectTopic["id"]) {
+  return await db.select({ sectionId: topics.sectionId }).from(topics).where(eq(topics.id, id))
 }
 
 export async function createUserAfterSignUp(data: InsertUser) {

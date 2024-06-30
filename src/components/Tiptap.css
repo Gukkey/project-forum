@@ -1,5 +1,38 @@
 body {
-  background-color: white;
+  background-color: #1a202c;
+}
+
+.create-thread-page {
+  padding: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-field {
+  width: 100%;
+  background-color: #e5e2e2;
+  color: #333;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.submit-button {
+  width: 100%;
+  background-color: #6a00f5;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #5a00d5;
 }
 
 .button-group {
@@ -9,7 +42,8 @@ body {
 }
 
 .button-group button {
-  background-color: #e5e2e2; /* Neat grey that goes well with white */
+  background-color: #e5e2e2;
+  color: #333;
   margin: 2px;
   padding: 8px 16px;
   border: none;
@@ -37,12 +71,13 @@ body {
 
 .editor {
   border: 1px solid #a9a9a9;
-  border-radius: 10px;
-  padding: 15px;
-  background-color: white; /* Neat grey to match the button background */
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #e5e2e2;
   color: #333;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin-top: 20px;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .editor p {

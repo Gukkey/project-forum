@@ -18,7 +18,7 @@ export async function generateInviteCode(
 ): Promise<InviteCodeReturnJsonSuccess | InviteCodeReturnJsonFailure> {
   const rString = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   let inviteCode = ""
-  for (var i = 0; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     inviteCode += rString[Math.floor(Math.random() * rString.length)]
   }
 

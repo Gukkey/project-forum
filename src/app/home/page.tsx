@@ -7,6 +7,7 @@ import { getAllDiscussionThreads } from "@projectforum/server/db/queries"
 export default async function HomePage() {
   const sections = await getAllSections()
 
+  // eslint-disable-next-line no-unused-vars
   const sectionsWithTopicsAndThreads = await Promise.all(
     sections.map(async (section) => {
       const topics = await getAllTopics(section.id)

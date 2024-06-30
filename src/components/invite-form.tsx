@@ -35,8 +35,9 @@ export function InviteForm() {
     }
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (validateInvite(data.invitecode)) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const result = await validateInvite(data.invitecode)
+    if (result) {
       console.log("Valid Invite")
     } else {
       toast({

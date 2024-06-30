@@ -1,6 +1,6 @@
 import { Webhook } from "svix"
 import { headers } from "next/headers"
-import { WebhookEvent } from "@clerk/nextjs/server"
+import { WebhookEvent, clerkClient } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
 import { createUserAfterSignUp } from "@projectforum/server/db/queries"
 import { InsertUser } from "@projectforum/server/db/schema"
@@ -68,6 +68,12 @@ export async function POST(req: Request) {
     } as InsertUser
 
     await createUserAfterSignUp(userData)
+    const res = await clerkClient.users.updateUserMetadata(user.id, {
+      publicMetadata: {
+        role: "member"
+      }
+    })
+    logger.debug(res)
   }
 
   return new Response("", { status: 200 })

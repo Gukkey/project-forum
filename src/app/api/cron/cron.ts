@@ -15,15 +15,12 @@ const redis = new Redis({
 export const job = new CronJob("*/10 * * * *", async () => {
   try {
     // Check and add anime to Redis
-    anime.map(async (animeId) => {
-      const exists = await redis.exists(animeId.toString(10))
-      if (!exists) {
-        addAnimeInRedis(animeId)
-      }
-    })
-
     anime.map(async (animeId, idx) => {
-      checkIfAnimeReleasesSoon(animeId, idx)
+      const exists = await redis.exists(animeId.toString(10))
+      if (exists === 0) {
+        await addAnimeInRedis(animeId)
+      }
+      await checkIfAnimeReleasesSoon(animeId, idx)
     })
     logCronJob(`Cron job completed, no anime is added.`)
   } catch (err) {

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { job } from "./cron"
 
+export const fetchCache = "force-no-store"
+
 export async function GET() {
   if (!job.running) {
     job.start()

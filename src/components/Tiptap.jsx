@@ -10,7 +10,7 @@ import { useCallback } from "react"
 import StarterKit from "@tiptap/starter-kit"
 import "./Tiptap.css"
 
-const Tiptap = () => {
+const Tiptap = ({ onTextChange }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -25,7 +25,11 @@ const Tiptap = () => {
       CodeBlock
     ],
     injectCSS: false,
-    content: "<p>Hello World! 🌎️</p>"
+    content: "<p>Hello World! 🌎️</p>",
+    onUpdate: ({ editor }) => {
+      const text = editor.getHTML().toString()
+      onTextChange(text)
+    }
   })
 
   const setLink = useCallback(() => {
@@ -53,8 +57,9 @@ const Tiptap = () => {
 
   return (
     <div>
-      <div className="container">
+      <div>
         <div className="control-group">
+          <EditorContent editor={editor} className="editor" />
           <div className="button-group">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
@@ -104,7 +109,6 @@ const Tiptap = () => {
           </div>
         </div>
       </div>
-      <EditorContent editor={editor} className="editor" />
     </div>
   )
 }

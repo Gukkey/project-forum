@@ -1,5 +1,6 @@
 "use client"
 
+//caa
 import { createNewThread } from "@projectforum/app/actions"
 // import { useParams } from "next/navigation"
 import TipTapInput from "@projectforum/app/home/TipTapInput"

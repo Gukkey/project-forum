@@ -1,26 +1,12 @@
 "use client"
+import { InsertTopic } from "@projectforum/server/db/schema"
 import Link from "next/link"
 import React from "react"
-
-interface ThreadType {
-  id: string
-  title: string
-  createdAt: Date
-  updatedAt: Date | null
-}
-
-interface TopicType {
-  id: string
-  name: string
-  createdAt: Date
-  updatedAt: Date | null
-  threads: ThreadType[]
-}
 
 interface SectionType {
   id: string
   name: string
-  topics: TopicType[]
+  topics: InsertTopic[]
 }
 
 export const Section = ({ sections }: { sections?: SectionType[] }) => {

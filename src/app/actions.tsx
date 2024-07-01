@@ -1,7 +1,5 @@
 "use server"
 
-globalThis.alert = globalThis.alert || ((msg) => console.log(msg))
-
 import { createSection } from "@projectforum/server/db/queries"
 import { InsertDiscussionThreads, InsertSection } from "@projectforum/server/db/schema"
 import { createDiscussionThread } from "@projectforum/server/db/queries"
@@ -22,13 +20,13 @@ export async function createNewThread(text: string, formdata: FormData) {
 
   // Check if content is empty
   if (!content.trim()) {
-    alert("Content cannot be empty.")
+    logger.error(" Content is empty ")
     return // Exit the function early
   }
 
   if (content === "<p></p>") {
-    alert("Content cannot be empty.")
-    return
+    logger.error(" Content is empty ")
+    return // Exit the function early
   }
 
   const topicId = formdata.get("topicId") as string

@@ -1,3 +1,4 @@
+import { logger } from "@projectforum/lib/logger"
 import { getAllDiscussionThreads } from "@projectforum/server/db/queries"
 import Link from "next/link"
 import React from "react"
@@ -5,7 +6,7 @@ import React from "react"
 
 export default async function DynamicPage({ params }: { params: { id: string } }) {
   const threads = await getAllDiscussionThreads(params.id)
-  console.log(threads)
+  logger.debug(threads)
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300">

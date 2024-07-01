@@ -13,6 +13,7 @@ import {
   topics,
   users
 } from "./schema"
+import { logger } from "@projectforum/lib/logger"
 
 export async function createSection(data: InsertSection) {
   await db.insert(sections).values(data)
@@ -23,7 +24,7 @@ export async function createTopic(data: InsertTopic) {
 }
 
 export async function createDiscussionThread(data: InsertDiscussionThreads) {
-  console.log(data)
+  logger.debug(data)
   await db.insert(discussionThreads).values(data)
 }
 

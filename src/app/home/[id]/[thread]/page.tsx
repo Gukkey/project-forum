@@ -1,12 +1,13 @@
 import { getDiscussionThread } from "@projectforum/server/db/queries"
 import Link from "next/link"
 import React from "react"
+import { logger } from "@projectforum/lib/logger"
 
 export default async function ThreadPage({ params }: { params: { id: string; thread: string } }) {
   const threads = await getDiscussionThread(params.thread)
 
-  console.log(params.thread)
-  console.log(params.id)
+  logger.debug(params.thread)
+  logger.debug(params.id)
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">

@@ -1,6 +1,7 @@
 import { getAllDiscussionThreads } from "@projectforum/server/db/queries"
 import Link from "next/link"
 import React from "react"
+// import { Button } from "@shadcn/button"
 
 export default async function DynamicPage({ params }: { params: { id: string } }) {
   const threads = await getAllDiscussionThreads(params.id)

@@ -64,16 +64,18 @@ export async function addAnimeInDiscussionThread(animeId: number, idx: number) {
       Promise.reject(`duplicate post ${post.title} index: ${idx}`)
     }
 
-    createDiscussionThread(post).then(async () => {
-      const nextEpisodeData = await fetchAnime(nextEpisode)
-      await redis
-        .set(animeId.toString(10), data.data.Media.nextAiringEpisode.airingAt)
-        .catch((err) => {
-          logCronJob(
-            `${err instanceof Error ? err.stack : err} redis key value: ${animeId.toString(10)} ${nextEpisodeData.data.Media.nextAiringEpisode.airingAt} index: ${idx}`
-          )
-        })
-    })
+    createDiscussionThread(post)
+      .then(async () => {
+        const nextEpisodeData = await fetchAnime(nextEpisode)
+        await redis
+          .set(animeId.toString(10), data.data.Media.nextAiringEpisode.airingAt)
+          .catch((err) => {
+            logCronJob(
+              `${err instanceof Error ? err.stack : err} redis key value: ${animeId.toString(10)} ${nextEpisodeData.data.Media.nextAiringEpisode.airingAt} index: ${idx}`
+            )
+          })
+      })
+      .catch((err) => logCronJob(`${err instanceof Error ? err.stack : err}`))
     logCronJob(`A new episode thread for ${post.title} has been released... index: ${idx}`)
   } else {
     logCronJob(`data null at ${animeId}`)
@@ -92,7 +94,7 @@ export async function checkIfAnimeReleasesSoon(animeId: number, idx: number) {
   const currentTime = Math.floor(new Date().getTime() / 1000.0) // Converting seconds to milliseconds
 
   // checks if the current time is in 10 minutes window after the anime episode gets released
-  if (timestamp >= currentTime && timestamp - currentTime <= 20 * 60) {
+  if (timestamp >= currentTime && timestamp - currentTime <= 10 * 60) {
     logCronJob(`timestamp: ${timestamp} currentTime: ${currentTime} anime id: ${animeId}`)
 
     // invokes addAnimeInDiscussuinThread and then checks again whether the next episode just got released

@@ -75,7 +75,12 @@ export async function addAnimeInDiscussionThread(animeId: number, idx: number) {
             )
           })
       })
-      .catch((err) => logCronJob(`${err instanceof Error ? err.stack : err}`))
+      .catch(() => {
+        logCronJob(`Duplicate post has been tried to created for ${animeName} - EPISODE ${episode}`)
+        Promise.reject(
+          `Duplicate post has been tried to created for ${animeName} - EPISODE ${episode}`
+        )
+      })
     logCronJob(`A new episode thread for ${post.title} has been released... index: ${idx}`)
   } else {
     logCronJob(`data null at ${animeId}`)
@@ -99,10 +104,12 @@ export async function checkIfAnimeReleasesSoon(animeId: number, idx: number) {
 
     // invokes addAnimeInDiscussuinThread and then checks again whether the next episode just got released
     // now two episodes getting released in same time is rare but we are covering this
-    addAnimeInDiscussionThread(animeId, idx)
-    checkIfAnimeReleasesSoon(animeId, idx)
+    try {
+      await addAnimeInDiscussionThread(animeId, idx)
+    } catch (err) {
+      logCronJob(`${err instanceof Error ? err.stack : err}`)
+    } finally {
+      await checkIfAnimeReleasesSoon(animeId, idx)
+    }
   }
-  // else {
-  //   return
-  // }
 }

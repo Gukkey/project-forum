@@ -15,32 +15,17 @@ import {
 } from "@shadcn/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@shadcn/popover"
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js"
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit"
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js"
-  },
-  {
-    value: "remix",
-    label: "Remix"
-  },
-  {
-    value: "astro",
-    label: "Astro"
-  }
-]
-
-export function ComboboxDemo() {
+export const ComboBox = ({
+  comboValues,
+  value,
+  onValueChange
+}: {
+  comboValues: { value: string; label: string }[]
+  value: string
+  // eslint-disable-next-line no-unused-vars
+  onValueChange: (v: string) => void
+}) => {
   const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -51,32 +36,30 @@ export function ComboboxDemo() {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."}
+          {value ? comboValues.find((c) => c.value === value)?.label : "Select value..."}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." className="h-9" />
+          <CommandInput placeholder="Search..." className="h-9" />
           <CommandList>
             <CommandEmpty>No framework found.</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {comboValues.map((c) => (
                 <CommandItem
-                  key={framework.value}
-                  value={framework.value}
+                  key={c.value}
+                  value={c.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
+                    onValueChange(currentValue === value ? "" : currentValue)
                     setOpen(false)
                   }}
                 >
-                  {framework.label}
+                  {c.label}
                   <CheckIcon
                     className={cn(
                       "ml-auto h-4 w-4",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      value === c.value ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

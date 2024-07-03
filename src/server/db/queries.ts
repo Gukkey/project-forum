@@ -7,7 +7,6 @@ import {
   InsertTopic,
   InsertUser,
   SelectDiscussionThreads,
-  SelectSection,
   SelectTopic,
   cronJobLogs,
   discussionThreads,
@@ -30,17 +29,13 @@ export async function createDiscussionThread(data: InsertDiscussionThreads) {
   await db.insert(discussionThreads).values(data)
 }
 
-export async function getAllSections() {
-  return db.select().from(sections)
-}
-
-export async function getAllTopics(id: SelectSection["id"]) {
-  return db.select().from(topics).where(eq(topics.sectionId, id))
-}
-
 export async function getAllDiscussionThreads(id: SelectTopic["id"]) {
   return db
-    .select()
+    .select({
+      id: discussionThreads.id,
+      title: discussionThreads.title,
+      content: discussionThreads.content
+    })
     .from(discussionThreads)
     .where(eq(discussionThreads.topicId, id))
     .orderBy(desc(discussionThreads.updatedAt))
@@ -59,7 +54,6 @@ export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
 }
 
-
 export async function getSectionId(id: SelectTopic["id"]) {
   return await db.select({ sectionId: topics.sectionId }).from(topics).where(eq(topics.id, id))
 }
@@ -70,4 +64,43 @@ export async function createCronJobLogs(data: InsertCronJobLogs) {
 
 export async function createUserAfterSignUp(data: InsertUser) {
   await db.insert(users).values(data)
+}
+
+type Topic = {
+  id: string
+  name: string
+}
+
+export interface SectionWithTopics {
+  id: string
+  name: string
+  topics: Topic[]
+}
+
+export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
+  const query = await db
+    .select({
+      sectionId: sections.id,
+      sectionName: sections.name,
+      topicId: topics.id,
+      topicName: topics.name
+    })
+    .from(sections)
+    .innerJoin(topics, eq(sections.id, topics.sectionId))
+
+  const groupedResults = query.reduce((arr, idx) => {
+    const section = arr.find((s) => s.id === idx.sectionId)
+    if (section) {
+      section.topics.push({ id: idx.topicId, name: idx.topicName })
+    } else {
+      arr.push({
+        id: idx.sectionId,
+        name: idx.sectionName,
+        topics: [{ id: idx.topicId, name: idx.topicName }]
+      })
+    }
+    return arr
+  }, [] as SectionWithTopics[])
+
+  return groupedResults
 }

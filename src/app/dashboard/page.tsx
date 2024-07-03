@@ -1,10 +1,11 @@
-import { auth } from "@clerk/nextjs/server"
 import { GenerateInviteForm } from "@projectforum/components/generate-invite"
 import { redirect } from "next/navigation"
+import { getUserRole } from "../actions"
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const currentlyLoggedInUserRole = await getUserRole()
   // if the logged in user is a member then redirect him to home page.
-  if (auth().sessionClaims?.publicMetadata?.role === "member") {
+  if (currentlyLoggedInUserRole === "member") {
     redirect("/")
   }
 

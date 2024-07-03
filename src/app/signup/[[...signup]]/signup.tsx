@@ -9,10 +9,14 @@ import { DialogContent, DialogTitle, DialogHeader } from "@shadcn/dialog"
 import { useContext } from "react"
 
 export const SignUpWithInvite = () => {
-  const { isValidInvite } = useContext(InviteContext) as InviteContextType
+  const { isValidInvite, role } = useContext(InviteContext) as InviteContextType
 
   return isValidInvite ? (
-    <SignUp />
+    <SignUp
+      unsafeMetadata={{
+        role
+      }}
+    />
   ) : (
     <div className="flex w-screen h-screen items-center justify-center">
       <Dialog>

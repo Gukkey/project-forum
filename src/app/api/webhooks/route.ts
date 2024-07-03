@@ -1,6 +1,6 @@
 import { Webhook } from "svix"
 import { headers } from "next/headers"
-import { WebhookEvent, clerkClient } from "@clerk/nextjs/server"
+import { WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
 import { createUserAfterSignUp } from "@projectforum/server/db/queries"
 import { InsertUser } from "@projectforum/server/db/schema"
@@ -8,7 +8,6 @@ import { InsertUser } from "@projectforum/server/db/schema"
 import { logger } from "@projectforum/lib/logger"
 
 export async function POST(req: Request) {
-  // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
   const WEBHOOK_SECRET = env.WEBHOOK_SECRET
 
   if (!WEBHOOK_SECRET) {
@@ -55,25 +54,22 @@ export async function POST(req: Request) {
   const eventType = evt.type
   if (eventType == "user.created") {
     const user = evt.data
+    const role = user.unsafe_metadata.role as "admin" | "member" | "mod"
     logger.info(`Webhook with and ID of ${user.id} and type of ${eventType}`)
     const email = user.email_addresses.find(
       (e) => e.id === user.primary_email_address_id
     )?.email_address
+
     const userData = {
       id: user.id,
       email,
-      name: evt.data.username ?? evt.data.first_name,
-      role: "member",
-      imageUrl: evt.data.image_url
+      role,
+      name: user.username ?? user.first_name,
+      imageUrl: user.image_url
     } as InsertUser
 
     await createUserAfterSignUp(userData)
-    const res = await clerkClient.users.updateUserMetadata(user.id, {
-      publicMetadata: {
-        role: "member"
-      }
-    })
-    logger.debug(res)
+    logger.info(`Created user with role ${role}`)
   }
 
   return new Response("", { status: 200 })

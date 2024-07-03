@@ -14,7 +14,6 @@ import {
   topics,
   users
 } from "./schema"
-import { logger } from "@projectforum/lib/logger"
 
 export async function createSection(data: InsertSection) {
   await db.insert(sections).values(data)
@@ -25,7 +24,6 @@ export async function createTopic(data: InsertTopic) {
 }
 
 export async function createDiscussionThread(data: InsertDiscussionThreads) {
-  logger.debug(data)
   await db.insert(discussionThreads).values(data)
 }
 
@@ -64,6 +62,10 @@ export async function createCronJobLogs(data: InsertCronJobLogs) {
 
 export async function createUserAfterSignUp(data: InsertUser) {
   await db.insert(users).values(data)
+}
+
+export async function getUserById(id: string) {
+  return await db.select().from(users).where(eq(users.id, id))
 }
 
 type Topic = {

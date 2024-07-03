@@ -94,7 +94,6 @@ export const discussionThreads = createTable(
   }
 )
 
-
 export const cronJobLogs = createTable("cron_job_logs", {
   id: uuid("id")
     .default(sql`gen_random_uuid()`)
@@ -135,4 +134,3 @@ export type InsertCronJobLogs = typeof cronJobLogs.$inferInsert
 export type SelectCronJobLogs = typeof cronJobLogs.$inferSelect
 
 export type InsertUser = typeof users.$inferInsert
-

@@ -1,10 +1,11 @@
 "use server"
 
-import { createSection } from "@projectforum/server/db/queries"
+import { createSection, getUserById } from "@projectforum/server/db/queries"
 import { InsertDiscussionThreads, InsertSection } from "@projectforum/server/db/schema"
 import { createDiscussionThread } from "@projectforum/server/db/queries"
 import { getSectionId } from "@projectforum/server/db/queries"
 import { logger } from "@projectforum/lib/logger"
+import { auth } from "@clerk/nextjs/server"
 
 export async function createNewSection(formdata: FormData) {
   const data: InsertSection = {
@@ -42,4 +43,13 @@ export async function createNewThread(text: string, formdata: FormData) {
     userId: formdata.get("userId") as string
   }
   await createDiscussionThread(data)
+}
+
+export async function getUserRole() {
+  const userId = auth().userId
+
+  if (!userId) return null
+
+  const userData = await getUserById(userId)
+  return userData[0].role
 }

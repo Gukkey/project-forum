@@ -6,6 +6,7 @@ import { createDiscussionThread } from "@projectforum/server/db/queries"
 import { getSectionId } from "@projectforum/server/db/queries"
 import { logger } from "@projectforum/lib/logger"
 import { auth } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 
 export async function createNewSection(formdata: FormData) {
   const data: InsertSection = {
@@ -43,6 +44,7 @@ export async function createNewThread(text: string, formdata: FormData) {
     userId: formdata.get("userId") as string
   }
   await createDiscussionThread(data)
+  redirect(`/home/${topicId}`)
 }
 
 export async function getUserRole() {

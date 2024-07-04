@@ -59,6 +59,7 @@ export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
 }
 
 export async function getSectionId(id: SelectTopic["id"]) {
+  console.log(id)
   return await db.select({ sectionId: topics.sectionId }).from(topics).where(eq(topics.id, id))
 }
 

@@ -1,4 +1,3 @@
-import { logger } from "@projectforum/lib/logger"
 import { Section } from "./Section"
 
 import { getAllSections, getAllTopics } from "@projectforum/server/db/queries"
@@ -19,8 +18,6 @@ export default async function HomePage() {
       return { ...section, topics: topicsWithThreads }
     })
   )
-
-  logger.debug(sectionsWithTopicsAndThreads)
 
   return (
     <div>

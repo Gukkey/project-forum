@@ -14,26 +14,6 @@ export const Section = ({ sections }: { sections?: SectionType[] }) => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300">
-      <header className="bg-gray-650 p-4 flex justify-between items-center">
-        <div className="text-xl font-bold">Project Forum</div>
-        <nav className="space-x-4">
-          <Link href="/home" className="text-gray-300 hover:text-white">
-            Home
-          </Link>
-          <Link href="#" className="text-gray-300 hover:text-white">
-            Topics
-          </Link>
-          <Link href="#" className="text-gray-300 hover:text-white">
-            Community
-          </Link>
-          <Link href="#" className="text-gray-300 hover:text-white">
-            Support
-          </Link>
-          <a href="#" className="text-gray-300 hover:text-white">
-            Other
-          </a>
-        </nav>
-      </header>
       <div className="flex flex-col lg:flex-row p-6">
         <div className="flex-1 bg-gray-800 p-6 rounded-lg">
           <table className="w-full text-left">
@@ -67,18 +47,6 @@ export const Section = ({ sections }: { sections?: SectionType[] }) => {
             ))}
           </table>
         </div>
-        {/* <aside className="flex-1 lg:flex-none lg:w-64 bg-gray-800 p-6 rounded-lg mt-6 lg:mt-0 lg:ml-6">
-          <div className="mb-6">
-            <h3 className="text-xl mb-4">Actions</h3>
-            <button className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 mb-2 rounded">
-              Create New Topic
-            </button>
-            <button className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 mb-2 rounded">
-              Create New Section
-            </button>
-          </div>
-          <div></div>
-        </aside> */}
       </div>
     </div>
   )

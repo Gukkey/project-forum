@@ -3,16 +3,13 @@ import { db } from "."
 import {
   InsertCronJobLogs,
   InsertDiscussionThreads,
-  InsertReplies,
   InsertSection,
   InsertTopic,
   InsertUser,
   SelectDiscussionThreads,
-  SelectReplies,
   SelectTopic,
   cronJobLogs,
   discussionThreads,
-  replies,
   sections,
   topics,
   users
@@ -37,8 +34,7 @@ export async function getAllDiscussionThreads(id: SelectTopic["id"]) {
     .select({
       id: discussionThreads.id,
       title: discussionThreads.title,
-      content: discussionThreads.content,
-      userId: discussionThreads.userId
+      content: discussionThreads.content
     })
     .from(discussionThreads)
     .where(eq(discussionThreads.topicId, id))
@@ -111,20 +107,4 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
   }, [] as SectionWithTopics[])
 
   return groupedResults
-}
-
-export async function insertReply(data: InsertReplies) {
-  return await db.insert(replies).values(data)
-}
-
-export async function getAllReplies(discussionThreadId: SelectReplies["discussionThreadId"]) {
-  await db
-    .select({
-      id: replies.id,
-      content: replies.content,
-      userId: replies.userId
-    })
-    .from(replies)
-    .where(eq(replies.discussionThreadId, discussionThreadId))
-    .orderBy(desc(replies.createdAt))
 }

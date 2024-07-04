@@ -3,6 +3,7 @@
 import { createSection, getUserById } from "@projectforum/server/db/queries"
 import { InsertDiscussionThreads, InsertSection } from "@projectforum/server/db/schema"
 import { createDiscussionThread } from "@projectforum/server/db/queries"
+import { getSectionId } from "@projectforum/server/db/queries"
 import { logger } from "@projectforum/lib/logger"
 import { auth } from "@clerk/nextjs/server"
 
@@ -30,12 +31,14 @@ export async function createNewThread(text: string, formdata: FormData) {
   }
 
   const topicId = formdata.get("topicId") as string
+  const sectionId = await getSectionId(topicId)
 
   logger.debug(text)
 
   const data: InsertDiscussionThreads = {
     title: formdata.get("title") as string,
     content: text,
+    sectionId: sectionId[0].sectionId,
     topicId: topicId,
     userId: formdata.get("userId") as string
   }

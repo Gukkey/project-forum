@@ -1,21 +1,18 @@
+import { env } from "@projectforum/env"
 import { Redis } from "@upstash/redis"
 
 // Initialize Redis outside of the job function
 const redis = new Redis({
-  url: process.env.REDIS_URL,
-  token: process.env.REDIS_TOKEN
+  url: env.NEXT_PUBLIC_REDIS_URL,
+  token: env.NEXT_PUBLIC_REDIS_TOKEN
 })
 
 interface InviteCodeReturnJsonSuccess {
   isInviteCodeGenerated: boolean
-  inviteCode: string
+  inviteCode: string | null
 }
 
-type InviteCodeReturnJsonFailure = Omit<InviteCodeReturnJsonSuccess, "inviteCode">
-
-export async function generateInviteCode(
-  role: string
-): Promise<InviteCodeReturnJsonSuccess | InviteCodeReturnJsonFailure> {
+export async function generateInviteCode(role: string): Promise<InviteCodeReturnJsonSuccess> {
   const rString = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   let inviteCode = ""
   for (let i = 0; i < 5; i++) {
@@ -25,47 +22,29 @@ export async function generateInviteCode(
   const checkIfSet = await redis.set(inviteCode, role)
   const isExpiredSet = await redis.expire(inviteCode, 7200)
 
-  let returnJson: InviteCodeReturnJsonSuccess | InviteCodeReturnJsonFailure = {
-    isInviteCodeGenerated: false
-  }
-
   if (checkIfSet === "OK" && isExpiredSet === 1) {
-    returnJson = {
-      isInviteCodeGenerated: true,
-      inviteCode: inviteCode
-    }
+    return Promise.resolve({ isInviteCodeGenerated: true, inviteCode })
   } else if (checkIfSet === "OK" && isExpiredSet !== 1) {
     redis.del(inviteCode)
   }
-
-  return Promise.resolve(returnJson)
+  return Promise.resolve({ isInviteCodeGenerated: false, inviteCode: null })
 }
 
 interface ValidateInviteCodeReturnJsonSuccess {
   isValidInvite: boolean
-  role: string
+  role: "admin" | "member" | null
 }
-
-type ValidateInviteCodeReturnJsonFalse = Omit<ValidateInviteCodeReturnJsonSuccess, "role">
 
 export async function validateInviteCode(
   inviteCode: string
-): Promise<ValidateInviteCodeReturnJsonSuccess | ValidateInviteCodeReturnJsonFalse> {
-  let returnJson: ValidateInviteCodeReturnJsonSuccess | ValidateInviteCodeReturnJsonFalse = {
-    isValidInvite: false
-  }
-
-  const value = await redis.get(inviteCode)
+): Promise<ValidateInviteCodeReturnJsonSuccess> {
+  const value = await redis.get<"admin" | "member" | null>(inviteCode)
   if (value) {
-    returnJson = {
-      isValidInvite: true,
-      role: String(value)
-    }
     if (inviteCode !== "hello") {
       redis.del(inviteCode)
     }
-    return Promise.resolve(returnJson)
+    return Promise.resolve({ isValidInvite: true, role: value })
   } else {
-    return Promise.reject(returnJson)
+    return Promise.reject({ isValidInvite: false, role: null })
   }
 }

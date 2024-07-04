@@ -1,5 +1,7 @@
 import { ApolloClient, ApolloQueryResult, InMemoryCache, gql } from "@apollo/client"
 
+export const fetchCache = "force-no-store"
+
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   uri: "https://graphql.anilist.co",

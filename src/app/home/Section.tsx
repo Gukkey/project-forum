@@ -1,15 +1,9 @@
 "use client"
-import { InsertTopic } from "@projectforum/server/db/schema"
+import { SectionWithTopics } from "@projectforum/server/db/queries"
 import Link from "next/link"
 import React from "react"
 
-interface SectionType {
-  id: string
-  name: string
-  topics: InsertTopic[]
-}
-
-export const Section = ({ sections }: { sections?: SectionType[] }) => {
+export const Section = ({ sections }: { sections?: SectionWithTopics[] }) => {
   const handleSectionClick = () => {}
 
   return (

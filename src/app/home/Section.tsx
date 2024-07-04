@@ -1,5 +1,5 @@
 "use client"
-import { SectionWithTopics } from "@projectforum/server/db/queries"
+import { SectionWithTopics } from "@projectforum/lib/types"
 import Link from "next/link"
 import React from "react"
 

@@ -17,7 +17,8 @@ import {
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@projectforum/components/shadcn/input-otp"
 import { toast } from "@projectforum/components/shadcn/use-toast"
 import { useContext } from "react"
-import { InviteContext, InviteContextType } from "@projectforum/context/invite"
+import { InviteContext } from "@projectforum/context/invite"
+import { InviteContextType } from "@projectforum/lib/types"
 
 const FormSchema = z.object({
   invitecode: z.string().min(5, {

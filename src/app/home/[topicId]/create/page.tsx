@@ -9,7 +9,7 @@ import { EditorContext, EditorContextType } from "@projectforum/context/editor"
 import "@projectforum/components/Tiptap.css"
 // import { navigate } from "@projectforum/app/actions"
 
-export default function CreateThread({ params }: { params: { id: string; thread: string } }) {
+export default function CreateThread({ params }: { params: { topicId: string; thread: string } }) {
   //   const sectionId = await getServerId(params.create)
 
   //get Section id from topic
@@ -40,7 +40,7 @@ export default function CreateThread({ params }: { params: { id: string; thread:
           className="input-field"
           hidden
         />
-        <input type="hidden" name="topicId" value={params.id} />
+        <input type="hidden" name="topicId" value={params.topicId} />
         <input type="hidden" name="userId" value="user_2i42wcdqETahwSY5PkP1Xz4wWNw" />
         <button type="submit" className="submit-button">
           Create Thread

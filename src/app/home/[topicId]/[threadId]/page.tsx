@@ -5,12 +5,11 @@ import { logger } from "@projectforum/lib/logger"
 export default async function ThreadPage({
   params
 }: {
-  params: { sectionId: string; topicId: string }
+  params: { threadId: string; topicId: string }
 }) {
-  const threads = await getDiscussionThread(params.topicId)
+  const threads = await getDiscussionThread(params.threadId)
 
   logger.debug(params.topicId)
-  logger.debug(params.sectionId)
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">
@@ -19,7 +18,7 @@ export default async function ThreadPage({
           <h2 className="text-2xl mb-4">Thread page</h2>
           <table className="w-full text-left">
             {threads.map((thread) => (
-              <React.Fragment key={thread.sectionId}>
+              <React.Fragment key={thread.id}>
                 <thead>
                   <tr>
                     <th className="pb-2 border-b border-gray-700">{thread.title}</th>

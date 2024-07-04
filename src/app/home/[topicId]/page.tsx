@@ -3,8 +3,8 @@ import Link from "next/link"
 import React from "react"
 // import { Button } from "@shadcn/button"
 
-export default async function DynamicPage({ params }: { params: { sectionId: string } }) {
-  const threads = await getAllDiscussionThreads(params.sectionId)
+export default async function DynamicPage({ params }: { params: { topicId: string } }) {
+  const threads = await getAllDiscussionThreads(params.topicId)
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300">
@@ -17,7 +17,7 @@ export default async function DynamicPage({ params }: { params: { sectionId: str
                 <thead>
                   <th className="pb-2 border-b border-gray-700">
                     <tr>
-                      <Link href={`/home/${params.sectionId}/${thread.id}`}>
+                      <Link href={`/home/${params.topicId}/${thread.id}`}>
                         <th className="px-4 py-2 text-left text-xl">{thread.title}</th>
                       </Link>
                     </tr>
@@ -32,7 +32,7 @@ export default async function DynamicPage({ params }: { params: { sectionId: str
             <div className="mb-6">
               <h3 className="text-xl mb-4">Actions</h3>
               <Link
-                href={`/home/${params.sectionId}/create`}
+                href={`/home/${params.topicId}/create`}
                 className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 mb-2 rounded"
               >
                 <button className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 mb-2 rounded">

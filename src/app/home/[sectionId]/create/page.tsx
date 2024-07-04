@@ -7,7 +7,7 @@ import TipTapInput from "@projectforum/app/home/TipTapInput"
 import { useContext } from "react"
 import { EditorContext, EditorContextType } from "@projectforum/context/editor"
 import "@projectforum/components/Tiptap.css"
-import { logger } from "@projectforum/lib/logger"
+// import { navigate } from "@projectforum/app/actions"
 
 export default function CreateThread({ params }: { params: { id: string; thread: string } }) {
   //   const sectionId = await getServerId(params.create)
@@ -18,8 +18,6 @@ export default function CreateThread({ params }: { params: { id: string; thread:
   const { text } = useContext(EditorContext) as EditorContextType
 
   const createNewThreadWithText = createNewThread.bind(null, text)
-
-  logger.debug(text)
 
   return (
     <div className="create-thread-page">

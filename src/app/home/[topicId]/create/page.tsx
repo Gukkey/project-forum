@@ -5,8 +5,9 @@ import { createNewThread } from "@projectforum/app/actions"
 // import { useParams } from "next/navigation"
 import TipTapInput from "@projectforum/app/home/TipTapInput"
 import { useContext } from "react"
-import { EditorContext, EditorContextType } from "@projectforum/context/editor"
+import { EditorContext } from "@projectforum/context/editor"
 import "@projectforum/components/Tiptap.css"
+import { EditorContextType } from "@projectforum/lib/types"
 // import { navigate } from "@projectforum/app/actions"
 
 export default function CreateThread({ params }: { params: { topicId: string; thread: string } }) {

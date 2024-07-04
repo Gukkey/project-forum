@@ -32,7 +32,7 @@ export const sections = createTable(
     createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
     updatedAt: timestamp("updatedAt")
       .default(sql`CURRENT_TIMESTAMP`)
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
   },
   (sections) => {
     return {
@@ -121,6 +121,24 @@ export const users = createTable(
   }
 )
 
+export const replies = createTable("discussion_thread_replies", {
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .unique()
+    .primaryKey(),
+  discussionThreadId: uuid("discussion_thread_id")
+    .references(() => discussionThreads.id)
+    .notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp("updatedAt")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+  userId: varchar("user_id", { length: 50 })
+    .references(() => users.id)
+    .notNull()
+})
+
 export type InsertSection = typeof sections.$inferInsert
 export type SelectSection = typeof sections.$inferSelect
 
@@ -134,3 +152,6 @@ export type InsertCronJobLogs = typeof cronJobLogs.$inferInsert
 export type SelectCronJobLogs = typeof cronJobLogs.$inferSelect
 
 export type InsertUser = typeof users.$inferInsert
+
+export type InsertReplies = typeof replies.$inferInsert
+export type SelectReplies = typeof replies.$inferSelect

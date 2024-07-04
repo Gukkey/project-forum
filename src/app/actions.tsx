@@ -1,12 +1,12 @@
 "use server"
 
 import { createSection, getUserById } from "@projectforum/server/db/queries"
-import { InsertDiscussionThreads, InsertSection } from "@projectforum/server/db/schema"
 import { createDiscussionThread } from "@projectforum/server/db/queries"
 import { getSectionId } from "@projectforum/server/db/queries"
 import { logger } from "@projectforum/lib/logger"
 import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
+import { InsertDiscussionThreads, InsertSection } from "@projectforum/lib/types"
 
 export async function createNewSection(formdata: FormData) {
   const data: InsertSection = {

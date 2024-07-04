@@ -3,9 +3,9 @@ import { headers } from "next/headers"
 import { WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
 import { createUserAfterSignUp } from "@projectforum/server/db/queries"
-import { InsertUser } from "@projectforum/server/db/schema"
 
 import { logger } from "@projectforum/lib/logger"
+import { InsertUser } from "@projectforum/lib/types"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.WEBHOOK_SECRET

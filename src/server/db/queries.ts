@@ -1,23 +1,19 @@
 import { desc, eq } from "drizzle-orm"
 import { db } from "."
+import { cronJobLogs, discussionThreads, replies, sections, topics, users } from "./schema"
+import { logger } from "@projectforum/lib/logger"
 import {
-  InsertCronJobLogs,
-  InsertDiscussionThreads,
-  InsertReplies,
   InsertSection,
   InsertTopic,
-  InsertUser,
-  SelectDiscussionThreads,
-  SelectReplies,
+  InsertDiscussionThreads,
   SelectTopic,
-  cronJobLogs,
-  discussionThreads,
-  replies,
-  sections,
-  topics,
-  users
-} from "./schema"
-import { logger } from "@projectforum/lib/logger"
+  SelectDiscussionThreads,
+  InsertCronJobLogs,
+  InsertUser,
+  InsertReplies,
+  SelectReplies,
+  SectionWithTopics
+} from "@projectforum/lib/types"
 
 export async function createSection(data: InsertSection) {
   await db.insert(sections).values(data)
@@ -73,17 +69,6 @@ export async function createUserAfterSignUp(data: InsertUser) {
 
 export async function getUserById(id: string) {
   return await db.select().from(users).where(eq(users.id, id))
-}
-
-type Topic = {
-  id: string
-  name: string
-}
-
-export interface SectionWithTopics {
-  id: string
-  name: string
-  topics: Topic[]
 }
 
 export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {

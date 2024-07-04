@@ -2,7 +2,8 @@
 
 import { SignUp } from "@clerk/nextjs"
 import { InviteForm } from "@projectforum/components/invite-form"
-import { InviteContext, InviteContextType } from "@projectforum/context/invite"
+import { InviteContext } from "@projectforum/context/invite"
+import { InviteContextType } from "@projectforum/lib/types"
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog"
 import { Button } from "@shadcn/button"
 import { DialogContent, DialogTitle, DialogHeader } from "@shadcn/dialog"

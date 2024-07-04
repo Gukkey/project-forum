@@ -138,20 +138,3 @@ export const replies = createTable("discussion_thread_replies", {
     .references(() => users.id)
     .notNull()
 })
-
-export type InsertSection = typeof sections.$inferInsert
-export type SelectSection = typeof sections.$inferSelect
-
-export type InsertTopic = typeof topics.$inferInsert
-export type SelectTopic = typeof topics.$inferSelect
-
-export type InsertDiscussionThreads = typeof discussionThreads.$inferInsert
-export type SelectDiscussionThreads = typeof discussionThreads.$inferSelect
-
-export type InsertCronJobLogs = typeof cronJobLogs.$inferInsert
-export type SelectCronJobLogs = typeof cronJobLogs.$inferSelect
-
-export type InsertUser = typeof users.$inferInsert
-
-export type InsertReplies = typeof replies.$inferInsert
-export type SelectReplies = typeof replies.$inferSelect

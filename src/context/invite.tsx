@@ -1,14 +1,7 @@
 "use client"
 import { validateInviteCode } from "@projectforum/app/dashboard/helper"
+import { InviteContextType } from "@projectforum/lib/types"
 import { FC, ReactNode, createContext, useState } from "react"
-
-export type InviteContextType = {
-  // invite: strings
-  isValidInvite: boolean
-  role: "admin" | "member" | null
-  // eslint-disable-next-line no-unused-vars
-  validateInvite: (invite: string) => Promise<boolean>
-}
 
 export const InviteContext = createContext<InviteContextType | null>(null)
 

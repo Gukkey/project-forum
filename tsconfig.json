@@ -19,7 +19,8 @@
     ],
     "paths": {
       "@shadcn/*": ["./src/components/shadcn/*"],
-      "@projectforum/*": ["./src/*"]
+      "@projectforum/*": ["./src/*"],
+      "@components/*": ["./src/components/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

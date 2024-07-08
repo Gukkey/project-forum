@@ -2,6 +2,7 @@ import {
   cronJobLogs,
   discussionThreads,
   replies,
+  roles,
   sections,
   topics,
   users
@@ -20,9 +21,13 @@ export type InsertCronJobLogs = typeof cronJobLogs.$inferInsert
 export type SelectCronJobLogs = typeof cronJobLogs.$inferSelect
 
 export type InsertUser = typeof users.$inferInsert
+export type SelectUser = typeof users.$inferSelect
 
 export type InsertReplies = typeof replies.$inferInsert
 export type SelectReplies = typeof replies.$inferSelect
+
+export type InsertRole = typeof roles.$inferInsert
+export type SelectRole = typeof roles.$inferSelect
 
 export type TipTapInputProps = {
   text: string

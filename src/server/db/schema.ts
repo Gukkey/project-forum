@@ -30,7 +30,7 @@ export const sections = createTable(
       .primaryKey(),
     name: varchar("name", { length: 256 }).notNull(),
     createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: timestamp("updatedAt")
+    updatedAt: timestamp("updated_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`)
   },
@@ -50,7 +50,7 @@ export const topics = createTable(
       .primaryKey(),
     name: varchar("name", { length: 256 }).notNull(),
     createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: timestamp("updatedAt")
+    updatedAt: timestamp("updated_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
     sectionId: uuid("section_id")
@@ -74,7 +74,7 @@ export const discussionThreads = createTable(
     title: varchar("name", { length: 1024 }).notNull(),
     content: text("content").notNull(),
     createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: timestamp("updatedAt")
+    updatedAt: timestamp("updated_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
     sectionId: uuid("section_id")
@@ -131,7 +131,7 @@ export const replies = createTable("discussion_thread_replies", {
     .notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: timestamp("updatedAt")
+  updatedAt: timestamp("updated_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   userId: varchar("user_id", { length: 50 })

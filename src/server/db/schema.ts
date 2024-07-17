@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm"
 import {
   boolean,
   pgTableCreator,
-  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -110,10 +109,8 @@ export const users = createTable(
   "users",
   {
     id: varchar("id", { length: 50 }).notNull().unique().primaryKey(),
-    username: text("name"),
-    roles: uuid("role_id")
-      .references(() => roles.id)
-      .array(),
+    name: text("name"),
+    role: text("role").$type<"admin" | "member" | "mod">(),
     email: text("email").notNull(),
     imageUrl: text("image_url")
   },
@@ -140,13 +137,4 @@ export const replies = createTable("discussion_thread_replies", {
   userId: varchar("user_id", { length: 50 })
     .references(() => users.id)
     .notNull()
-})
-
-export const roles = createTable("user_roles", {
-  id: uuid("id")
-    .default(sql`gen_random_uuid()`)
-    .unique()
-    .primaryKey(),
-  name: varchar("name", { length: 256 }).notNull().unique(),
-  privilege: smallint("privilege").default(10)
 })

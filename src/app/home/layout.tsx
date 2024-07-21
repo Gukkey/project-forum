@@ -1,3 +1,4 @@
+import { SignOutButton } from "@clerk/nextjs"
 import Link from "next/link"
 
 export default function Layout({
@@ -24,6 +25,9 @@ export default function Layout({
           </Link>
           <a href="#" className="text-gray-300 hover:text-white">
             Other
+          </a>
+          <a href="#" className="text-gray-300 hover:text-white">
+            <SignOutButton redirectUrl="/landing" />
           </a>
         </nav>
       </header>

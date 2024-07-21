@@ -2,7 +2,7 @@ import { Webhook } from "svix"
 import { headers } from "next/headers"
 import { WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
-import { createUserAfterSignUp } from "@projectforum/server/db/queries"
+import { createUserAfterSignUp, getRoleIdByRoleName } from "@projectforum/server/db/queries"
 
 import { logger } from "@projectforum/lib/logger"
 import { InsertUser } from "@projectforum/lib/types"
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     })
   }
 
-  // Inserting user data into the vercel database
+  // Inserting user data into the database
   const eventType = evt.type
   if (eventType == "user.created") {
     const user = evt.data
@@ -59,12 +59,19 @@ export async function POST(req: Request) {
     const email = user.email_addresses.find(
       (e) => e.id === user.primary_email_address_id
     )?.email_address
+    const roleArray: string[] = []
+    const roleId = await getRoleIdByRoleName(role)
+    if (roleId.length === 0) {
+      logger.debug(`roleId is undefined or null`)
+    } else if (roleId[0].id !== undefined && roleId[0].id !== null) {
+      roleArray.push(roleId[0].id)
+    }
 
     const userData = {
       id: user.id,
       email,
-      role,
-      name: user.username ?? user.first_name,
+      roles: roleArray,
+      username: user.username,
       imageUrl: user.image_url
     } as InsertUser
 

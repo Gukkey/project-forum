@@ -1,17 +1,21 @@
 import { redirect } from "next/navigation"
 import { getUserRole } from "./actions"
+import { Role } from "@projectforum/lib/enums"
 
 export default async function Home() {
   const currentlyLoggedInUserRole = await getUserRole()
 
   if (currentlyLoggedInUserRole) {
-    if (currentlyLoggedInUserRole === "member") {
-      redirect("/home")
-    }
-    // if the logged in user is an admin then redirect to dashboard
-    // only admins can access dashboard
-    else if (currentlyLoggedInUserRole === "admin") {
-      redirect("/dashboard")
+    const { privilege } = currentlyLoggedInUserRole
+    if (privilege !== null) {
+      if (privilege <= Role.Member) {
+        redirect("/home")
+      }
+      // if the logged in user is an admin then redirect to dashboard
+      // only admins can access dashboard
+      else if (privilege >= Role.Admin) {
+        redirect("/dashboard")
+      }
     }
   }
   // redirect to landing page if "/" is hit

@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1719133194508,
-      "tag": "0000_normal_giant_girl",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1719133261256,
-      "tag": "0001_curly_the_captain",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1719133356353,
-      "tag": "0002_naive_bucky",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1719158215900,
-      "tag": "0003_exotic_cannonball",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1721236847853,
-      "tag": "0004_quiet_winter_soldier",
+      "when": 1721570666311,
+      "tag": "0000_naive_black_tom",
       "breakpoints": true
     }
   ]

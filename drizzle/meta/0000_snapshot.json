@@ -1,9 +1,59 @@
 {
-  "id": "36ebfe54-00b8-4fe0-82ff-f4f0a34c5b9c",
+  "id": "fcc6dc6c-b013-4027-8838-275b55d360ec",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.example-project-1_cron_job_logs": {
+      "name": "example-project-1_cron_job_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "logs": {
+          "name": "logs",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anime_added": {
+          "name": "anime_added",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "got_error": {
+          "name": "got_error",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "nothing_happened": {
+          "name": "nothing_happened",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "example-project-1_cron_job_logs_id_unique": {
+          "name": "example-project-1_cron_job_logs_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["id"]
+        }
+      }
+    },
     "public.example-project-1_discussion_threads": {
       "name": "example-project-1_discussion_threads",
       "schema": "",
@@ -31,11 +81,11 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "updatedAt": {
-          "name": "updatedAt",
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -115,6 +165,121 @@
         }
       }
     },
+    "public.example-project-1_discussion_thread_replies": {
+      "name": "example-project-1_discussion_thread_replies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "discussion_thread_id": {
+          "name": "discussion_thread_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "example-project-1_discussion_thread_replies_discussion_thread_id_example-project-1_discussion_threads_id_fk": {
+          "name": "example-project-1_discussion_thread_replies_discussion_thread_id_example-project-1_discussion_threads_id_fk",
+          "tableFrom": "example-project-1_discussion_thread_replies",
+          "tableTo": "example-project-1_discussion_threads",
+          "columnsFrom": ["discussion_thread_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "example-project-1_discussion_thread_replies_user_id_example-project-1_users_id_fk": {
+          "name": "example-project-1_discussion_thread_replies_user_id_example-project-1_users_id_fk",
+          "tableFrom": "example-project-1_discussion_thread_replies",
+          "tableTo": "example-project-1_users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "example-project-1_discussion_thread_replies_id_unique": {
+          "name": "example-project-1_discussion_thread_replies_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["id"]
+        }
+      }
+    },
+    "public.example-project-1_user_roles": {
+      "name": "example-project-1_user_roles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "privilege": {
+          "name": "privilege",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 10
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "example-project-1_user_roles_id_unique": {
+          "name": "example-project-1_user_roles_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["id"]
+        },
+        "example-project-1_user_roles_name_unique": {
+          "name": "example-project-1_user_roles_name_unique",
+          "nullsNotDistinct": false,
+          "columns": ["name"]
+        }
+      }
+    },
     "public.example-project-1_section": {
       "name": "example-project-1_section",
       "schema": "",
@@ -136,11 +301,11 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "updatedAt": {
-          "name": "updatedAt",
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -195,11 +360,11 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "CURRENT_TIMESTAMP"
         },
-        "updatedAt": {
-          "name": "updatedAt",
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -261,19 +426,19 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "role": {
-          "name": "role",
-          "type": "varchar(10)",
+        "role_ids": {
+          "name": "role_ids",
+          "type": "uuid[]",
           "primaryKey": false,
           "notNull": false
         },
         "email": {
           "name": "email",
-          "type": "varchar(50)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -284,7 +449,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "users_idx": {
+          "name": "users_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -292,6 +473,11 @@
           "name": "example-project-1_users_id_unique",
           "nullsNotDistinct": false,
           "columns": ["id"]
+        },
+        "example-project-1_users_name_unique": {
+          "name": "example-project-1_users_name_unique",
+          "nullsNotDistinct": false,
+          "columns": ["name"]
         }
       }
     }

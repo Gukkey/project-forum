@@ -1,6 +1,6 @@
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, sql } from "drizzle-orm"
 import { db } from "."
-import { cronJobLogs, discussionThreads, replies, sections, topics, users } from "./schema"
+import { cronJobLogs, discussionThreads, replies, roles, sections, topics, users } from "./schema"
 import { logger } from "@projectforum/lib/logger"
 import {
   InsertSection,
@@ -12,11 +12,18 @@ import {
   InsertUser,
   InsertReplies,
   SelectReplies,
-  SectionWithTopics
+  SectionWithTopics,
+  InsertRole,
+  SelectRole,
+  SelectUser
 } from "@projectforum/lib/types"
 
 export async function createSection(data: InsertSection) {
   await db.insert(sections).values(data)
+}
+
+export async function getAllSections() {
+  return await db.select({ id: sections.id, name: sections.name }).from(sections)
 }
 
 export async function createTopic(data: InsertTopic) {
@@ -60,7 +67,7 @@ export async function getSectionId(id: SelectTopic["id"]) {
 }
 
 export async function createCronJobLogs(data: InsertCronJobLogs) {
-  return await db.insert(cronJobLogs).values(data)
+  await db.insert(cronJobLogs).values(data)
 }
 
 export async function createUserAfterSignUp(data: InsertUser) {
@@ -69,6 +76,76 @@ export async function createUserAfterSignUp(data: InsertUser) {
 
 export async function getUserById(id: string) {
   return await db.select().from(users).where(eq(users.id, id))
+}
+
+export async function getRoleIdByRoleName(roleName: string) {
+  return await db.select({ id: roles.id }).from(roles).where(eq(roles.name, roleName))
+}
+
+export async function addRole(data: InsertRole) {
+  return db.insert(roles).values(data)
+}
+
+async function findAllRoles(username: string) {
+  return await db
+    .select({ roles: users.roles })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1)
+}
+
+export async function addRoleToUserInDatabase(user: { username: string; role: string }) {
+  const roleArray = await findAllRoles(user.username)
+  const arr = roleArray[0].roles ?? []
+  arr.push(user.username)
+  return db.update(users).set({ roles: arr }).where(eq(users.username, user.username))
+}
+
+export async function deleteRoleFromUserDatabase(user: { username: string; role: string }) {
+  const roleArray = await findAllRoles(user.username)
+  const arr = roleArray[0]?.roles
+  if (arr !== null) {
+    for (let i = 0; i < arr?.length; i++) {
+      if (arr[i] === user.role) {
+        arr.splice(i, 1)
+      }
+    }
+  } else {
+    Promise.reject(`This user has no role to remove`)
+  }
+  return db.update(users).set({ roles: arr }).where(eq(users.username, user.username))
+}
+
+export async function returnHighestRoleWithPrivilege(username: SelectUser["username"]) {
+  try {
+    if (username) {
+      // return await db
+      //   .select({
+      //     roleName: roles.name,
+      //     privilege: roles.privilege
+      //   })
+      //   .from(roles)
+      //   .innerJoin(users, inArray(roles.id, users.roles))
+      //   .where(eq(users.username, username))
+      //   .orderBy(asc(roles.privilege))
+      //   .limit(1)
+      return await db.execute(sql`SELECT roles.name AS "roleName", roles.privilege
+      FROM "example-project-1_user_roles" as roles
+      INNER JOIN "example-project-1_users" as users ON roles.id = ANY(users.role_ids)
+      WHERE users.name = ${username}
+      ORDER BY roles.privilege ASC
+      LIMIT 1`)
+    }
+    logger.debug(`Username is null`)
+    return Promise.reject(`Username is null`)
+  } catch (error) {
+    logger.error(`Error while trying to query highest role: ${error}`)
+    return Promise.reject(`Error while trying to query highest role: ${error}`)
+  }
+}
+
+export async function getRolePrivilege(role: SelectRole["name"]) {
+  return await db.select({ privilege: roles.privilege }).from(roles).where(eq(roles.name, role))
 }
 
 export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
@@ -100,11 +177,11 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
 }
 
 export async function insertReply(data: InsertReplies) {
-  return await db.insert(replies).values(data)
+  await db.insert(replies).values(data)
 }
 
 export async function getAllReplies(discussionThreadId: SelectReplies["discussionThreadId"]) {
-  await db
+  return await db
     .select({
       id: replies.id,
       content: replies.content,

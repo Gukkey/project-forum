@@ -1,12 +1,18 @@
 import { GenerateInviteForm } from "@projectforum/components/generate-invite"
 import { redirect } from "next/navigation"
 import { getUserRole } from "../actions"
+import { Role } from "../../lib/enums"
+import { logger } from "@projectforum/lib/logger"
 
 export default async function AdminDashboardPage() {
   const currentlyLoggedInUserRole = await getUserRole()
+  const privilege = currentlyLoggedInUserRole?.privilege as number
+  logger.debug(`privilege: ${privilege}`)
   // if the logged in user is a member then redirect him to home page.
-  if (currentlyLoggedInUserRole === "member") {
-    redirect("/")
+  if (currentlyLoggedInUserRole !== null) {
+    if (privilege >= Role.Member) {
+      redirect("/")
+    }
   }
 
   return (

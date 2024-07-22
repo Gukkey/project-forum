@@ -3,4 +3,4 @@ if sh -c ": >/dev/tty" >/dev/null 2>/dev/null; then exec </dev/tty >/dev/tty 2>&
 
 . "$(dirname "$0")/_/husky.sh"
 
-exec < /dev/tty && npx git-cz --hook || true
+# exec < /dev/tty && npx git-cz --hook || true

@@ -61,22 +61,25 @@ export async function getUserRole() {
 
   logger.debug(userId)
   const userData = await getUserById(userId)
-  logger.debug(`userData: ${userData[0].username}`)
+  logger.debug(`userData: ${userData[0]}`)
   let defaultData = {
     name: "member",
     privilege: 10
   }
-  try {
-    const highestRole = await returnHighestRoleWithPrivilege(userData[0]?.username)
-    defaultData = {
-      name: highestRole.rows[0].name as string,
-      privilege: highestRole.rows[0].privilege as number
+
+  if (userData[0]) {
+    try {
+      const highestRole = await returnHighestRoleWithPrivilege(userData[0]?.username)
+      defaultData = {
+        name: highestRole.rows[0].name as string,
+        privilege: highestRole.rows[0].privilege as number
+      }
+      logger.debug(`highestRole: ${highestRole}`)
+      return defaultData
+    } catch (error) {
+      logger.error(`Error while trying to get highest role: ${error}`)
+      return defaultData
     }
-    logger.debug(`highestRole: ${highestRole}`)
-    return defaultData
-  } catch (error) {
-    logger.error(`Error while trying to get highest role: ${error}`)
-    return defaultData
   }
 }
 

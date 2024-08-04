@@ -35,7 +35,7 @@ export async function createDiscussionThread(data: InsertDiscussionThreads) {
   await db.insert(discussionThreads).values(data)
 }
 
-export async function getAllDiscussionThreads(id: SelectTopic["id"]) {
+export async function getAllDiscussionThreadsByTopic(id: SelectTopic["id"]) {
   return db
     .select({
       id: discussionThreads.id,
@@ -57,7 +57,7 @@ export async function getLatestDiscussionThread(id: SelectTopic["id"]) {
     .limit(1)
 }
 
-export async function getDiscussionThread(id: SelectDiscussionThreads["id"]) {
+export async function getThread(id: SelectDiscussionThreads["id"]) {
   return await db.select().from(discussionThreads).where(eq(discussionThreads.id, id))
 }
 

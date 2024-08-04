@@ -27,7 +27,7 @@ export default function Layout({
             Other
           </a>
           <a href="#" className="text-gray-300 hover:text-white">
-            <SignOutButton redirectUrl="/landing" />
+            <SignOutButton signOutOptions={{ redirectUrl: "/signin" }} />
           </a>
         </nav>
       </header>

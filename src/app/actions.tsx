@@ -1,58 +1,60 @@
 "use server"
 
+import { logger } from "@projectforum/lib/logger"
+import { auth, currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
 import {
+  returnHighestRoleWithPrivilege,
+  getUserById,
+  getSectionIdByTopicId,
+  createDiscussionThread,
   addRole,
   addRoleToUserInDatabase,
-  createSection,
+  getRoleByName,
   deleteRoleFromUserDatabase,
-  getRolePrivilege,
-  getUserById,
-  returnHighestRoleWithPrivilege
-} from "@projectforum/server/db/queries"
-import { createDiscussionThread } from "@projectforum/server/db/queries"
-import { getSectionId } from "@projectforum/server/db/queries"
-import { logger } from "@projectforum/lib/logger"
-import { auth } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
-import { InsertDiscussionThreads, InsertSection } from "@projectforum/lib/types"
+  createSection
+} from "@projectforum/db/queries"
+import { Prisma } from "@prisma/client"
 
 export async function createNewSection(formdata: FormData) {
-  const data: InsertSection = {
-    name: formdata.get("name") as string,
-    createdAt: new Date(),
-    updatedAt: new Date()
+  const data: Prisma.SectionCreateInput = {
+    name: formdata.get("name") as string
   }
   await createSection(data)
 }
 
-export async function createNewThread(text: string, formdata: FormData) {
-  const content = formdata.get("content") as string
-
+export async function createNewThread(text: string, topicId: string, formdata: FormData) {
   // Check if content is empty
-  if (!content.trim()) {
+  if (!text.trim()) {
     logger.error(" Content is empty ")
     return // Exit the function early
   }
 
-  if (content === "<p></p>") {
+  if (text === "<p></p>") {
     logger.error(" Content is empty ")
     return // Exit the function early
   }
-
-  const topicId = formdata.get("topicId") as string
-  const sectionId = await getSectionId(topicId)
-
+  // const topicId = formdata.get("topicId") as string
+  const sectionId = await getSectionIdByTopicId(topicId)
+  const user = await currentUser()
   logger.debug(text)
+  const name = formdata.get("title")
 
-  const data: InsertDiscussionThreads = {
-    title: formdata.get("title") as string,
-    content: text,
-    sectionId: sectionId[0].sectionId,
-    topicId: topicId,
-    userId: formdata.get("userId") as string
+  if (!name && name?.length == 0) {
+    logger.error("Title is empty")
+    return
   }
-  await createDiscussionThread(data)
-  redirect(`/home/${topicId}`)
+  if (sectionId && user) {
+    const data: Prisma.ThreadUncheckedCreateInput = {
+      name: name as string,
+      content: text,
+      section_id: sectionId.section_id,
+      topic_id: topicId,
+      user_id: user.id
+    }
+    await createDiscussionThread(data)
+    redirect(`/home/${topicId}`)
+  }
 }
 
 export async function getUserRole() {
@@ -61,26 +63,13 @@ export async function getUserRole() {
 
   logger.debug(userId)
   const userData = await getUserById(userId)
-  logger.debug(`userData: ${userData[0]}`)
-  let defaultData = {
-    name: "member",
-    privilege: 10
+  logger.info(userData, "getUserRole() :: Current User")
+  if (userData) {
+    const userPrivilegeData = await returnHighestRoleWithPrivilege(userData.id)
+    logger.debug(userPrivilegeData, "getUserRole():: userPrivilegeData")
+    return userPrivilegeData
   }
-
-  if (userData[0]) {
-    try {
-      const highestRole = await returnHighestRoleWithPrivilege(userData[0]?.username)
-      defaultData = {
-        name: highestRole.rows[0].name as string,
-        privilege: highestRole.rows[0].privilege as number
-      }
-      logger.debug(`highestRole: ${highestRole}`)
-      return defaultData
-    } catch (error) {
-      logger.error(`Error while trying to get highest role: ${error}`)
-      return defaultData
-    }
-  }
+  return null
 }
 
 export async function addRoleWithPrivilege(
@@ -88,8 +77,7 @@ export async function addRoleWithPrivilege(
   rolePrivilege: number,
   currentUsername: string
 ) {
-  const roleWithPrivilege = await returnHighestRoleWithPrivilege(currentUsername)
-  const privilege = roleWithPrivilege.rows[0].privilege as number
+  const { privilege } = await returnHighestRoleWithPrivilege(currentUsername)
   if (privilege !== null && privilege >= rolePrivilege) {
     const role = {
       name: roleName,
@@ -97,47 +85,39 @@ export async function addRoleWithPrivilege(
     }
     return await addRole(role)
   }
-  return Promise.reject(`Requested Role privilege is higher than current user's highest privilege`)
+  return null
 }
 
-export async function addRoleToUser(username: string, roleName: string, currentUsername: string) {
-  const currentUser = await returnHighestRoleWithPrivilege(currentUsername)
-  const currentUserPrivilege = currentUser.rows[0].privilege as number
-  const requestedRole = await getRolePrivilege(roleName)
-  const requestedRolePrivilege = requestedRole[0].privilege
+export async function addRoleToUser(user_id: string, roleName: string) {
+  const currentUser = await returnHighestRoleWithPrivilege(user_id)
+  const currentUserPrivilege = currentUser.privilege
+  const requestedRole = await getRoleByName(roleName)
 
-  if (currentUserPrivilege !== null && requestedRolePrivilege !== null) {
-    if (currentUserPrivilege > requestedRolePrivilege) {
-      const user = {
-        username: username,
-        role: roleName
-      }
-      return addRoleToUserInDatabase(user)
-    }
-    return Promise.reject(`Current user's privilege is lower than requested role privilege`)
-  }
-  return Promise.reject(`Either current user's privilege or requested role's privilege is null`)
+  if (!currentUserPrivilege) throw new Error("Current user's privilege is null")
+  if (!requestedRole?.privilege)
+    throw new Error("Either requested role's privilege or the requested role itself does not exist")
+
+  const requestedRolePrivilege = requestedRole.privilege
+
+  if (currentUserPrivilege < requestedRolePrivilege)
+    throw new Error("Current user's privilege is lower than the requested privilege")
+
+  return addRoleToUserInDatabase(user_id, requestedRole.id)
 }
 
-export async function deleteRoleFromUser(
-  username: string,
-  roleName: string,
-  currentUsername: string
-) {
-  const currentUser = await returnHighestRoleWithPrivilege(currentUsername)
-  const currentUserPrivilege = currentUser.rows[0].privilege as number
-  const requestedRole = await getRolePrivilege(roleName)
-  const requestedRolePrivilege = requestedRole[0].privilege
+export async function deleteRoleFromUser(user_id: string, roleName: string) {
+  const currentUser = await returnHighestRoleWithPrivilege(user_id)
+  const currentUserPrivilege = currentUser.privilege
+  const requestedRole = await getRoleByName(roleName)
 
-  if (currentUserPrivilege !== null && requestedRolePrivilege !== null) {
-    if (currentUserPrivilege > requestedRolePrivilege) {
-      const user = {
-        username: username,
-        role: roleName
-      }
-      return deleteRoleFromUserDatabase(user)
-    }
-    return Promise.reject(`Current user's privilege is lower than requested role privilege`)
-  }
-  return Promise.reject(`Either current user's privilege or requested role's privilege is null`)
+  if (!currentUserPrivilege) throw new Error("Current user's privilege is null")
+  if (!requestedRole?.privilege)
+    throw new Error("Either requested role's privilege or the requested role itself does not exist")
+
+  const requestedRolePrivilege = requestedRole.privilege
+
+  if (currentUserPrivilege < requestedRolePrivilege)
+    throw new Error("Current user's privilege is lower than the requested privilege")
+
+  return deleteRoleFromUserDatabase(user_id, requestedRole.id)
 }

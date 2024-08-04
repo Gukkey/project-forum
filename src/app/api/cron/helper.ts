@@ -1,9 +1,10 @@
 import { Redis } from "@upstash/redis"
 import { fetchAnime } from "./anilist"
-import { createCronJobLogs, createDiscussionThread } from "@projectforum/server/db/queries"
-import { discussionThreads } from "@projectforum/server/db/schema"
-import { db } from "@projectforum/server/db"
-import { eq } from "drizzle-orm"
+import {
+  createCronJobLogs,
+  createDiscussionThread,
+  getDiscussionThreadByTitle
+} from "@projectforum/db/queries"
 
 export const fetchCache = "force-no-store"
 
@@ -28,13 +29,13 @@ export function logCronJob(
   message: any,
   isError?: boolean,
   animeAdded?: boolean,
-  nothingHappened?: boolean
+  nothing_happened?: boolean
 ) {
   const log = {
     log: message,
     ...(isError !== undefined && { isError }),
     ...(animeAdded !== undefined && { animeAdded }),
-    ...(nothingHappened !== undefined && { nothingHappened })
+    ...(nothing_happened !== undefined && { nothing_happened })
   }
   createCronJobLogs(log)
 }
@@ -45,23 +46,20 @@ export async function addAnimeInDiscussionThread(animeId: number, idx: number) {
     const animeName = data.data.Media.title.english
     const episode = data.data.Media.nextAiringEpisode.episode
     const post = {
-      title: `${animeName} - EPISODE ${episode} DISCUSSION`,
+      name: `${animeName} - EPISODE ${episode} DISCUSSION`,
       content: `This thread is automated`,
-      sectionId: process.env.CRON_JOB_SECTION_ID as string,
-      topicId: process.env.CRON_JOB_TOPIC_ID as string,
-      userId: process.env.CRON_JOB_USER_ID as string
+      section_id: process.env.CRON_JOB_SECTION_ID as string,
+      topic_id: process.env.CRON_JOB_TOPIC_ID as string,
+      user_id: process.env.CRON_JOB_USER_ID as string
     }
 
     const nextEpisode = episode + 1
 
-    const checkForTitle = await db
-      .select()
-      .from(discussionThreads)
-      .where(eq(discussionThreads.title, post.title))
+    const checkForTitle = await getDiscussionThreadByTitle(post.name)
 
     if (checkForTitle.length > 0) {
-      logCronJob(`duplicate post ${post.title} index: ${idx} length: ${checkForTitle.length}`)
-      Promise.reject(`duplicate post ${post.title} index: ${idx}`)
+      logCronJob(`duplicate post ${post.name} index: ${idx} length: ${checkForTitle.length}`)
+      Promise.reject(`duplicate post ${post.name} index: ${idx}`)
     }
 
     createDiscussionThread(post)
@@ -81,7 +79,7 @@ export async function addAnimeInDiscussionThread(animeId: number, idx: number) {
           `Duplicate post has been tried to created for ${animeName} - EPISODE ${episode}`
         )
       })
-    logCronJob(`A new episode thread for ${post.title} has been released... index: ${idx}`)
+    logCronJob(`A new episode thread for ${post.name} has been released... index: ${idx}`)
   } else {
     logCronJob(`data null at ${animeId}`)
   }

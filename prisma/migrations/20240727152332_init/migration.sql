@@ -76,6 +76,44 @@ CREATE TABLE "users" (
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
+ --> trigger statements 
+  
+ CREATE OR REPLACE FUNCTION update_timestamp() RETURNS TRIGGER AS $$ 
+ BEGIN 
+     NEW.updated_at = now(); 
+     RETURN NEW; 
+ END; 
+ $$ language 'plpgsql'; 
+  
+  
+ --> section-trigger 
+  
+ CREATE TRIGGER trigger_update_sections 
+ BEFORE UPDATE ON "sections" 
+ FOR EACH ROW  
+ EXECUTE FUNCTION update_timestamp(); 
+  
+ --> topic-trigger 
+  
+ CREATE TRIGGER trigger_update_topics 
+ BEFORE UPDATE ON "topics" 
+ FOR EACH ROW  
+ EXECUTE FUNCTION update_timestamp(); 
+  
+ --> disussion-threads-trigger 
+  
+ CREATE TRIGGER threads 
+ BEFORE UPDATE ON "threads" 
+ FOR EACH ROW  
+ EXECUTE FUNCTION update_timestamp(); 
+  
+ --> replies-trigger 
+  
+ CREATE TRIGGER trigger_update_replies 
+ BEFORE UPDATE ON "replies" 
+ FOR EACH ROW  
+ EXECUTE FUNCTION update_timestamp(); 
+
 -- CreateIndex
 CREATE UNIQUE INDEX "role_name_unique" ON "roles"("name");
 

@@ -1,0 +1,96 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CronJobLogs {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  logs             String?
+  anime_added      Boolean? @default(false)
+  got_error        Boolean? @default(false)
+  nothing_happened Boolean? @default(true)
+
+  @@map("cron_job_logs")
+}
+
+model Reply {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content    String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  user_id    String    @db.VarChar(50)
+  thread_id  String    @db.Uuid
+
+  threads Thread @relation(fields: [thread_id], references: [id])
+  users   User   @relation(fields: [user_id], references: [id])
+
+  @@map("replies")
+}
+
+model Role {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String @unique(map: "role_name_unique") @db.VarChar(256)
+  privilege Int?   @default(10) @db.SmallInt
+
+  @@map("roles")
+}
+
+model Section {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String    @unique(map: "section_idx") @db.VarChar(256)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+
+  threads Thread[]
+  topics  Topic[]
+
+  @@map("sections")
+}
+
+model Thread {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String    @unique(map: "thread_idx") @db.VarChar(1024)
+  content    String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  section_id String    @db.Uuid
+  topic_id   String    @db.Uuid
+  user_id    String    @db.VarChar(50)
+  replies    Reply[]
+  section    Section   @relation(fields: [section_id], references: [id])
+  topic      Topic     @relation(fields: [topic_id], references: [id])
+  user       User      @relation(fields: [user_id], references: [id])
+
+  @@map("threads")
+}
+
+model Topic {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String    @unique(map: "topic_idx") @db.VarChar(256)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  section_id String    @db.Uuid
+  threads    Thread[]
+
+  section Section @relation(fields: [section_id], references: [id])
+
+  @@map("topics")
+}
+
+model User {
+  id        String   @id @unique(map: "users_idx") @db.VarChar(50)
+  name      String   @unique(map: "user_name_unique")
+  role_ids  String[] @db.Uuid
+  email     String
+  image_url String?
+
+  threads Thread[]
+  replies Reply[]
+
+  @@map("users")
+}

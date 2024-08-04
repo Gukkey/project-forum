@@ -2,10 +2,9 @@ import { Webhook } from "svix"
 import { headers } from "next/headers"
 import { WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
-import { createUserAfterSignUp, getRoleIdByRoleName } from "@projectforum/server/db/queries"
+import { createUserAfterSignUp, getRoleIdByRoleName } from "@projectforum/db/queries"
 
 import { logger } from "@projectforum/lib/logger"
-import { InsertUser } from "@projectforum/lib/types"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.WEBHOOK_SECRET
@@ -61,21 +60,24 @@ export async function POST(req: Request) {
     )?.email_address
     const roleArray: string[] = []
     const roleId = await getRoleIdByRoleName(role)
-    if (roleId.length === 0) {
+    if (!roleId) {
       logger.debug(`roleId is undefined or null`)
-    } else if (roleId[0].id !== undefined && roleId[0].id !== null) {
-      roleArray.push(roleId[0].id)
+      return
+    } else {
+      roleArray.push(roleId.id)
     }
 
-    const userData = {
+    if (!user.username || !email) {
+      logger.error("No Username or email provided")
+      return
+    }
+    await createUserAfterSignUp({
       id: user.id,
       email,
-      roles: roleArray,
-      username: user.username,
-      imageUrl: user.image_url
-    } as InsertUser
-
-    await createUserAfterSignUp(userData)
+      role_ids: roleArray,
+      name: user.username,
+      image_url: user.image_url
+    })
     logger.info(`Created user with role ${role}`)
   }
 

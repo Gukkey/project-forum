@@ -1,5 +1,5 @@
-import { getSectionsWithTopics } from "@projectforum/server/db/queries"
-import { Section } from "./Section"
+import { Section } from "@projectforum/components/section"
+import { getSectionsWithTopics } from "@projectforum/db/queries"
 
 export default async function HomePage() {
   const sectionsWithTopics = await getSectionsWithTopics()

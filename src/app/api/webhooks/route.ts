@@ -1,6 +1,6 @@
 import { Webhook } from "svix"
 import { headers } from "next/headers"
-import { WebhookEvent } from "@clerk/nextjs/server"
+import { clerkClient, WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
 import { createUserAfterSignUp, getRoleIdByRoleName } from "@projectforum/db/queries"
 
@@ -59,26 +59,35 @@ export async function POST(req: Request) {
       (e) => e.id === user.primary_email_address_id
     )?.email_address
     const roleArray: string[] = []
-    const roleId = await getRoleIdByRoleName(role)
-    if (!roleId) {
-      logger.debug(`roleId is undefined or null`)
-      return
-    } else {
-      roleArray.push(roleId.id)
-    }
+    const userId = user.id
+    try {
+      const roleId = await getRoleIdByRoleName(role)
+      if (!roleId) {
+        logger.debug(`roleId is undefined or null`)
+        return
+      } else {
+        roleArray.push(roleId.id)
+      }
 
-    if (!user.username || !email) {
-      logger.error("No Username or email provided")
-      return
+      if (!user.username || !email) {
+        logger.error("No Username or email provided")
+        return
+      }
+
+      await createUserAfterSignUp({
+        id: user.id,
+        email,
+        role_ids: roleArray,
+        name: user.username,
+        image_url: user.image_url
+      })
+      logger.info(`Created user with role ${role}`)
+    } catch (error) {
+      if (userId !== null) {
+        await clerkClient.users.deleteUser(userId)
+      }
+      logger.error(`User could not be created`)
     }
-    await createUserAfterSignUp({
-      id: user.id,
-      email,
-      role_ids: roleArray,
-      name: user.username,
-      image_url: user.image_url
-    })
-    logger.info(`Created user with role ${role}`)
   }
 
   return new Response("", { status: 200 })

@@ -29,20 +29,17 @@ async function main() {
       {
         id: "user_2jpTXGTq9ps1UDFNQXvpL5N0AVf",
         email: "forumadmin@yopmail.com",
-        name: "forumadmin",
-        role_ids: [roles.find((r) => r.name === "admin")?.id as string]
+        name: "forumadmin"
       },
       {
         id: "user_2jpTQe6NEo9JvCv4R3yTH01h5NJ",
         email: "forummod@yopmail.com",
-        name: "forummod",
-        role_ids: [roles.find((r) => r.name === "mod")?.id as string]
+        name: "forummod"
       },
       {
         id: "user_2jpTaRc3DGT6H8JDK1gWoGYglH3",
         email: "forummember@yopmail.com",
-        name: "forummember",
-        role_ids: [roles.find((r) => r.name === "member")?.id as string]
+        name: "forummember"
       }
     ]
   })
@@ -91,6 +88,26 @@ async function main() {
 
   logger.debug("::::::::::::::::: THREADS CREATED :::::::::::::::::")
   logger.debug({ threads })
+
+  const userroles = await prisma.userRole.createManyAndReturn({
+    data: [
+      {
+        user_id: users.find((u) => u.name === "forumadmin")?.id as string,
+        role_id: roles.find((r) => r.name === "admin")?.id as string
+      },
+      {
+        user_id: users.find((u) => u.name === "forummod")?.id as string,
+        role_id: roles.find((r) => r.name === "mod")?.id as string
+      },
+      {
+        user_id: users.find((u) => u.name === "forummember")?.id as string,
+        role_id: roles.find((r) => r.name === "member")?.id as string
+      }
+    ]
+  })
+
+  logger.debug("::::::::::::::::: USERROLES CREATED :::::::::::::::::")
+  logger.debug({ userroles })
 }
 
 main()

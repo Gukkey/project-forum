@@ -33,9 +33,10 @@ model Reply {
 }
 
 model Role {
-  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String @unique(map: "role_name_unique") @db.VarChar(256)
-  privilege Int?   @default(10) @db.SmallInt
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String     @unique(map: "role_name_unique") @db.VarChar(256)
+  privilege Int?       @default(10) @db.SmallInt
+  UserRole  UserRole[]
 
   @@map("roles")
 }
@@ -83,14 +84,24 @@ model Topic {
 }
 
 model User {
-  id        String   @id @unique(map: "users_idx") @db.VarChar(50)
-  name      String   @unique(map: "user_name_unique")
-  role_ids  String[] @db.Uuid
+  id        String  @id @unique(map: "users_idx") @db.VarChar(50)
+  name      String  @unique(map: "user_name_unique")
   email     String
   image_url String?
 
-  threads Thread[]
-  replies Reply[]
+  threads  Thread[]
+  replies  Reply[]
+  UserRole UserRole[]
 
   @@map("users")
+}
+
+model UserRole {
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user    User   @relation(fields: [user_id], references: [id])
+  role    Role   @relation(fields: [role_id], references: [id])
+  user_id String @db.VarChar(50)
+  role_id String @db.Uuid
+
+  @@map("user_roles")
 }

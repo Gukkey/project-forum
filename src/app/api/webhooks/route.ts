@@ -2,9 +2,12 @@ import { Webhook } from "svix"
 import { headers } from "next/headers"
 import { clerkClient, WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
-import { createUserAfterSignUp, getRoleIdByRoleName } from "@projectforum/db/queries"
+import { createUserAfterSignUp } from "@projectforum/db/queries"
 
 import { logger } from "@projectforum/lib/logger"
+import { PrismaClient } from "@prisma/client"
+
+const prisma = new PrismaClient()
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.WEBHOOK_SECRET
@@ -53,22 +56,25 @@ export async function POST(req: Request) {
   const eventType = evt.type
   if (eventType == "user.created") {
     const user = evt.data
-    const role = user.unsafe_metadata.role as "admin" | "member" | "mod"
+    const role = user.unsafe_metadata.role as string
+    const inviteId = user.unsafe_metadata.inviteId as string
     logger.info(`Webhook with and ID of ${user.id} and type of ${eventType}`)
     const email = user.email_addresses.find(
       (e) => e.id === user.primary_email_address_id
     )?.email_address
-    const roleArray: string[] = []
+
+    logger.debug(`Role ID: ${role}, inviteId: ${inviteId}`)
+
+    // first take the role id from the invite table
+
+    const inviteCodeRecord = await prisma.invite.findFirst({
+      where: {
+        id: inviteId
+      }
+    })
+
     const userId = user.id
     try {
-      const roleId = await getRoleIdByRoleName(role)
-      if (!roleId) {
-        logger.debug(`roleId is undefined or null`)
-        return
-      } else {
-        roleArray.push(roleId.id)
-      }
-
       if (!user.username || !email) {
         logger.error("No Username or email provided")
         return
@@ -77,10 +83,28 @@ export async function POST(req: Request) {
       await createUserAfterSignUp({
         id: user.id,
         email,
-        role_ids: roleArray,
         name: user.username,
         image_url: user.image_url
       })
+
+      // push the info to user role table, then update invites table
+      await prisma.userRole.create({
+        data: {
+          role_id: String(inviteCodeRecord?.assigned_role_id),
+          user_id: String(user.id)
+        }
+      })
+
+      await prisma.invite.update({
+        where: {
+          id: inviteId
+        },
+        data: {
+          used_by: userId,
+          used_on: new Date(Date.now())
+        }
+      })
+
       logger.info(`Created user with role ${role}`)
     } catch (error) {
       if (userId !== null) {

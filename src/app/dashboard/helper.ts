@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client"
 import { env } from "@projectforum/env"
 import { Redis } from "@upstash/redis"
 
@@ -6,6 +7,8 @@ const redis = new Redis({
   url: env.NEXT_PUBLIC_REDIS_URL,
   token: env.NEXT_PUBLIC_REDIS_TOKEN
 })
+
+const prisma = new PrismaClient()
 
 interface InviteCodeReturnJsonSuccess {
   isInviteCodeGenerated: boolean
@@ -32,19 +35,29 @@ export async function generateInviteCode(role: string): Promise<InviteCodeReturn
 
 interface ValidateInviteCodeReturnJsonSuccess {
   isValidInvite: boolean
-  role: "admin" | "member" | null
+  role: string | null
+  inviteId: string | null
 }
+
+// To do: alter the code
+
+// write index for invite field
 
 export async function validateInviteCode(
   inviteCode: string
 ): Promise<ValidateInviteCodeReturnJsonSuccess> {
-  const value = await redis.get<"admin" | "member" | null>(inviteCode)
-  if (value) {
-    if (inviteCode !== "hello") {
-      redis.del(inviteCode)
+  const value = await prisma.invite.findFirst({
+    where: {
+      invite_code: inviteCode
     }
-    return Promise.resolve({ isValidInvite: true, role: value })
+  })
+  if (value) {
+    return Promise.resolve({
+      isValidInvite: true,
+      role: value.assigned_role_id,
+      inviteId: value.id
+    })
   } else {
-    return Promise.reject({ isValidInvite: false, role: null })
+    return Promise.reject({ isValidInvite: false, role: null, inviteId: null })
   }
 }

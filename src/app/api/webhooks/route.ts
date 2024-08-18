@@ -6,6 +6,7 @@ import { createUserAfterSignUp } from "@projectforum/db/queries"
 
 import { logger } from "@projectforum/lib/logger"
 import { PrismaClient } from "@prisma/client"
+import { redirect } from "next/navigation"
 
 const prisma = new PrismaClient()
 
@@ -104,14 +105,15 @@ export async function POST(req: Request) {
           used_on: new Date(Date.now())
         }
       })
-
       logger.info(`Created user with role ${role}`)
     } catch (error) {
-      if (userId !== null) {
-        await clerkClient.users.deleteUser(userId)
-      }
+      logger.error(error)
+      await clerkClient.users.deleteUser(userId)
+      await prisma.user.delete({ where: { id: userId } })
       logger.error(`User could not be created`)
     }
+
+    redirect("/")
   }
 
   return new Response("", { status: 200 })

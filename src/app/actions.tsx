@@ -8,10 +8,10 @@ import {
   getUserById,
   getSectionIdByTopicId,
   createDiscussionThread,
-  addRole,
-  addRoleToUserInDatabase,
+  createNewRole,
+  addRoleToUser,
   getRoleByName,
-  deleteRoleFromUserDatabase,
+  deleteRoleFromUser,
   createSection
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
@@ -83,12 +83,12 @@ export async function addRoleWithPrivilege(
       name: roleName,
       privilege: rolePrivilege
     }
-    return await addRole(role)
+    return await createNewRole(role)
   }
   return null
 }
 
-export async function addRoleToUser(user_id: string, roleName: string) {
+export async function addRoleToUserAction(user_id: string, roleName: string) {
   const currentUser = await returnHighestRoleWithPrivilege(user_id)
   const currentUserPrivilege = currentUser.privilege
   const requestedRole = await getRoleByName(roleName)
@@ -102,10 +102,11 @@ export async function addRoleToUser(user_id: string, roleName: string) {
   if (currentUserPrivilege < requestedRolePrivilege)
     throw new Error("Current user's privilege is lower than the requested privilege")
 
-  return addRoleToUserInDatabase(user_id, requestedRole.id)
+  const { id: role_id } = requestedRole
+  return addRoleToUser({ user_id, role_id })
 }
 
-export async function deleteRoleFromUser(user_id: string, roleName: string) {
+export async function deleteRoleFromUserAction(user_id: string, roleName: string) {
   const currentUser = await returnHighestRoleWithPrivilege(user_id)
   const currentUserPrivilege = currentUser.privilege
   const requestedRole = await getRoleByName(roleName)
@@ -119,5 +120,6 @@ export async function deleteRoleFromUser(user_id: string, roleName: string) {
   if (currentUserPrivilege < requestedRolePrivilege)
     throw new Error("Current user's privilege is lower than the requested privilege")
 
-  return deleteRoleFromUserDatabase(user_id, requestedRole.id)
+  const { id: role_id } = requestedRole
+  return deleteRoleFromUser({ user_id, role_id })
 }

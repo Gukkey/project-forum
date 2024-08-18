@@ -103,11 +103,11 @@ model Invite {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   invite_code      String    @unique(map: "invite_code")
   assigned_role_id String    @map("assigned_role_id") @db.Uuid
-  created_by       String    @map("created_by") 
+  created_by       String    @map("created_by")
   issued_on        DateTime  @default(now()) @map("issued_on") @db.Timestamp(6)
-  is_used          Boolean   @default(false) @map("is_true")
-  used_by          String?   @unique @map("used_by") 
-  used_on          DateTime? @default(now()) @map("used_on") @db.Timestamp(6)
+  is_used          Boolean   @default(false)
+  used_by          String?   @unique
+  used_on          DateTime? @db.Timestamp(6)
 
   role      Role  @relation(fields: [assigned_role_id], references: [id])
   createdBy User  @relation(name: "created_by", fields: [created_by], references: [id])
@@ -117,11 +117,11 @@ model Invite {
 }
 
 model UserRole {
-  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user    User   @relation(fields: [user_id], references: [id])
   role    Role   @relation(fields: [role_id], references: [id])
   user_id String @db.VarChar(50)
   role_id String @db.Uuid
 
+  @@id([user_id, role_id])
   @@map("user_roles")
 }

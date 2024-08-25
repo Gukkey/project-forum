@@ -70,7 +70,7 @@ export async function validateInviteCode(
       invite_code: inviteCode
     }
   })
-  if (value) {
+  if (value && value.is_used === false) {
     return {
       isValidInvite: true,
       role: value.assigned_role_id,

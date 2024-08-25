@@ -85,7 +85,7 @@ model Topic {
 }
 
 model User {
-  id        String  @id @unique(map: "users_idx") @db.VarChar(50)
+  id        String  @id @db.VarChar(50)
   name      String  @unique(map: "user_name_unique")
   email     String
   image_url String?

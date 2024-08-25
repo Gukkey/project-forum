@@ -1,3 +1,5 @@
+import { Toaster } from "@shadcn/toaster"
+
 export default function SignUpLayout({
   children
 }: Readonly<{
@@ -14,6 +16,7 @@ export default function SignUpLayout({
       }}
     >
       {children}
+      <Toaster />
     </section>
   )
 }

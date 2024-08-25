@@ -33,9 +33,11 @@ model Reply {
 }
 
 model Role {
-  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String @unique(map: "role_name_unique") @db.VarChar(256)
-  privilege Int?   @default(10) @db.SmallInt
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String     @unique(map: "role_name_unique") @db.VarChar(256)
+  privilege Int?       @default(10) @db.SmallInt
+  Invite    Invite[]
+  UserRole  UserRole[]
 
   @@map("roles")
 }
@@ -83,14 +85,43 @@ model Topic {
 }
 
 model User {
-  id        String   @id @unique(map: "users_idx") @db.VarChar(50)
-  name      String   @unique(map: "user_name_unique")
-  role_ids  String[] @db.Uuid
+  id        String  @id @db.VarChar(50)
+  name      String  @unique(map: "user_name_unique")
   email     String
   image_url String?
 
-  threads Thread[]
-  replies Reply[]
+  threads   Thread[]
+  replies   Reply[]
+  createdBy Invite[]   @relation("created_by")
+  usedBy    Invite?    @relation("used_by")
+  UserRole  UserRole[]
 
   @@map("users")
+}
+
+model Invite {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invite_code      String    @unique(map: "invite_code")
+  assigned_role_id String    @map("assigned_role_id") @db.Uuid
+  created_by       String    @map("created_by")
+  issued_on        DateTime  @default(now()) @map("issued_on") @db.Timestamp(6)
+  is_used          Boolean   @default(false)
+  used_by          String?   @unique
+  used_on          DateTime? @db.Timestamp(6)
+
+  role      Role  @relation(fields: [assigned_role_id], references: [id])
+  createdBy User  @relation(name: "created_by", fields: [created_by], references: [id])
+  usedBy    User? @relation(name: "used_by", fields: [used_by], references: [id])
+
+  @@map("invites")
+}
+
+model UserRole {
+  user    User   @relation(fields: [user_id], references: [id])
+  role    Role   @relation(fields: [role_id], references: [id])
+  user_id String @db.VarChar(50)
+  role_id String @db.Uuid
+
+  @@id([user_id, role_id])
+  @@map("user_roles")
 }

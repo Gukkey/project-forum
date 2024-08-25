@@ -71,41 +71,55 @@ export async function getRoleIdByRoleName(roleName: string) {
   return await prisma.role.findUnique({ select: { id: true }, where: { name: roleName } })
 }
 
-export async function addRole(data: Prisma.RoleCreateInput) {
+export async function createNewRole(data: Prisma.RoleCreateInput) {
   return await prisma.role.create({ data })
 }
 
-async function getAllRolesByUser(user_id: string) {
-  return await prisma.user.findFirst({ select: { role_ids: true }, where: { id: user_id } })
+// async function getAllRolesByUser(user_id: string) {
+//   return await prisma.user.findFirst({ select: { role_ids: true }, where: { id: user_id } })
+// }
+
+export async function addRoleToUser(data: { user_id: string; role_id: string }) {
+  return await prisma.userRole.create({ data })
 }
 
-export async function addRoleToUserInDatabase(user_id: string, role_id: string) {
-  const rolesResult = await getAllRolesByUser(user_id)
-  const roles = rolesResult?.role_ids ?? []
-  roles.push(role_id)
-  return await prisma.user.update({ where: { id: user_id }, data: { role_ids: roles } })
-}
+export async function deleteRoleFromUser(data: { user_id: string; role_id: string }) {
+  return await prisma.userRole.deleteMany({
+    where: { role_id: data.user_id, user_id: data.user_id }
+  })
+  // const rolesResult = await getAllRolesByUser(user_id)
+  // const roles = rolesResult?.role_ids ?? []
 
-export async function deleteRoleFromUserDatabase(user_id: string, role_id: string) {
-  const rolesResult = await getAllRolesByUser(user_id)
-  const roles = rolesResult?.role_ids ?? []
+  // if (roles.length == 0) {
+  //   throw new Error("This user does not have any roles")
+  // }
 
-  if (roles.length == 0) {
-    throw new Error("This user does not have any roles")
-  }
-
-  const updatedRoles = roles.filter((r) => r != role_id)
-  return await prisma.user.update({ where: { id: user_id }, data: { role_ids: updatedRoles } })
+  // const updatedRoles = roles.filter((r) => r != role_id)
+  // return await prisma.user.update({ where: { id: user_id }, data: { role_ids: updatedRoles } })
 }
 
 export async function returnHighestRoleWithPrivilege(userid: string) {
-  const result = await prisma.$queryRaw<Role[]>`
-        select roles.name as name, roles.id as id, privilege from roles
-        inner join users on roles.id = ANY(users.role_ids)
-        where users.id = ${userid}
-        order by roles.privilege ASC
-        limit 1;
-        `
+  // const result = await prisma.$queryRaw<Role[]>`
+  //       select roles.name as name, roles.id as id, privilege from roles
+  //       inner join users on roles.id = ANY(users.role_ids)
+  //       where users.id = ${userid}
+  //       order by roles.privilege ASC
+  //       limit 1;
+  //       `
+  const result = await prisma.$queryRaw<Pick<Role, "privilege">[]>`
+          select
+          b.privilege 
+        from
+          users a,
+          roles b,
+          user_roles c
+        where
+          a.id = c.user_id
+          and b.id = c.role_id 
+          and a.id = ${userid}
+        order by b.privilege
+        limit  1;
+  `
   return result[0]
 }
 

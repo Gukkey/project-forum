@@ -26,9 +26,7 @@ export default function Layout({
           <a href="#" className="text-gray-300 hover:text-white">
             Other
           </a>
-          <a href="#" className="text-gray-300 hover:text-white">
-            <SignOutButton signOutOptions={{ redirectUrl: "/signin" }} />
-          </a>
+          <SignOutButton signOutOptions={{ redirectUrl: "/signin" }} />
         </nav>
       </header>
       {children}

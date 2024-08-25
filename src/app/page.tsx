@@ -2,14 +2,20 @@ import { redirect } from "next/navigation"
 import { getUserRole } from "./actions"
 import { Role } from "@projectforum/lib/enums"
 import { logger } from "@projectforum/lib/logger"
+import { auth } from "@clerk/nextjs/server"
 
 export default async function Home() {
-  const currentlyLoggedInUserRole = await getUserRole()
+  const user = auth().userId
+  if (!user) redirect("/landing")
 
-  logger.debug(currentlyLoggedInUserRole, `HOMEPAGE, route ('/'), currentlyLoggedInUserRole ::`)
+  const currentlyLoggedInUserRole = await getUserRole()
   if (currentlyLoggedInUserRole) {
+    logger.debug(
+      currentlyLoggedInUserRole.privilege,
+      `HOMEPAGE, route ('/'), currentlyLoggedInUserRole ::`
+    )
     const { privilege } = currentlyLoggedInUserRole
-    if (privilege !== null) {
+    if (privilege) {
       if (privilege >= Role.Member) {
         redirect("/home")
       }
@@ -19,8 +25,6 @@ export default async function Home() {
         redirect("/dashboard")
       }
     }
-  } else {
-    redirect("/landing")
   }
   // redirect to landing page if "/" is hit
 }

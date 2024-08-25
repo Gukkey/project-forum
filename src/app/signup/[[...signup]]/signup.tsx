@@ -10,12 +10,13 @@ import { DialogContent, DialogTitle, DialogHeader } from "@shadcn/dialog"
 import { useContext } from "react"
 
 export const SignUpWithInvite = () => {
-  const { isValidInvite, role } = useContext(InviteContext) as InviteContextType
+  const { isValidInvite, role, inviteId } = useContext(InviteContext) as InviteContextType
 
   return isValidInvite ? (
     <SignUp
       unsafeMetadata={{
-        role
+        role,
+        inviteId
       }}
     />
   ) : (

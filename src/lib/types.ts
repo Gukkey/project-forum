@@ -44,7 +44,8 @@ export type EditorContextType = {
 export type InviteContextType = {
   // invite: strings
   isValidInvite: boolean
-  role: "admin" | "member" | null
+  role: string | null
+  inviteId: string | null
   // eslint-disable-next-line no-unused-vars
   validateInvite: (invite: string) => Promise<boolean>
 }

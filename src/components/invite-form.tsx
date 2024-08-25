@@ -44,6 +44,7 @@ export function InviteForm() {
       toast({
         title: "Your invite code is invalid"
       })
+      console.log("Invalid Invite")
     }
   }
 

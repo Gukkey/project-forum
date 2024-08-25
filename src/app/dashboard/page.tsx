@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { getUserRole } from "../actions"
 import { Role } from "../../lib/enums"
 import { logger } from "@projectforum/lib/logger"
+import { SignOutButton } from "@clerk/nextjs"
 
 export default async function AdminDashboardPage() {
   const currentlyLoggedInUserRole = await getUserRole()
@@ -18,8 +19,9 @@ export default async function AdminDashboardPage() {
   return (
     <div className=" min-w-screen min-h-screen flex flex-col items-center gap-2">
       <div className="w-full border-b mb-4">
-        <div className="w-3/4 h-[120px] mx-auto flex items-center">
+        <div className="w-3/4 h-[120px] mx-auto flex items-center justify-between">
           <h1 className="text-bold text-2xl">Admin Dashboard</h1>
+          <SignOutButton />
         </div>
       </div>
       <div className="w-3/4">

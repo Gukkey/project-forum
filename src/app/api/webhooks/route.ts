@@ -1,12 +1,12 @@
 import { Webhook } from "svix"
 import { headers } from "next/headers"
-import { clerkClient, WebhookEvent } from "@clerk/nextjs/server"
+import { WebhookEvent } from "@clerk/nextjs/server"
 import { env } from "@projectforum/env"
 import { createUserAfterSignUp } from "@projectforum/db/queries"
 
 import { logger } from "@projectforum/lib/logger"
 import { PrismaClient } from "@prisma/client"
-import { redirect } from "next/navigation"
+// import { redirect } from "next/navigation"
 
 const prisma = new PrismaClient()
 
@@ -101,19 +101,19 @@ export async function POST(req: Request) {
           id: inviteId
         },
         data: {
+          is_used: true,
           used_by: userId,
           used_on: new Date(Date.now())
         }
       })
       logger.info(`Created user with role ${role}`)
     } catch (error) {
-      logger.error(error)
-      await clerkClient.users.deleteUser(userId)
-      await prisma.user.delete({ where: { id: userId } })
-      logger.error(`User could not be created`)
+      logger.error(error, "Inside catch")
+      // await clerkClient.users.deleteUser(userId)
+      // await prisma.user.delete({ where: { id: userId } })
+      return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 })
     }
-
-    redirect("/")
+    // redirect("/")
   }
 
   return new Response("", { status: 200 })

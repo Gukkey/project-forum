@@ -173,3 +173,21 @@ export async function getAllReplies(discussionThreadId: string) {
     orderBy: { created_at: "desc" }
   })
 }
+
+// write an query function to fetch topic name from topicId
+
+export async function getTopicName(topicId: string) {
+  return await prisma.topic.findUnique({
+    select: { name: true },
+    where: { id: topicId }
+  })
+}
+
+// write an query function to fetch thread name from threadId
+
+export async function getThreadName(threadId: string) {
+  return await prisma.thread.findUnique({
+    select: { name: true },
+    where: { id: threadId }
+  })
+}

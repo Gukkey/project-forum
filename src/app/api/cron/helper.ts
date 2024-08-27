@@ -5,12 +5,13 @@ import {
   createDiscussionThread,
   getDiscussionThreadByTitle
 } from "@projectforum/db/queries"
+import { env } from "@projectforum/env"
 
 export const fetchCache = "force-no-store"
 
 const redis = new Redis({
-  url: process.env.REDIS_URL,
-  token: process.env.REDIS_TOKEN
+  url: env.REDIS_URL,
+  token: env.REDIS_TOKEN
 })
 
 export async function addAnimeInRedis(anime: number) {
@@ -48,9 +49,9 @@ export async function addAnimeInDiscussionThread(animeId: number, idx: number) {
     const post = {
       name: `${animeName} - EPISODE ${episode} DISCUSSION`,
       content: `This thread is automated`,
-      section_id: process.env.CRON_JOB_SECTION_ID as string,
-      topic_id: process.env.CRON_JOB_TOPIC_ID as string,
-      user_id: process.env.CRON_JOB_USER_ID as string
+      section_id: env.CRON_JOB_SECTION_ID as string,
+      topic_id: env.CRON_JOB_TOPIC_ID as string,
+      user_id: env.CRON_JOB_USER_ID as string
     }
 
     const nextEpisode = episode + 1

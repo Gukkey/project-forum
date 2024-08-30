@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "../src/db/index"
 import { logger } from "../src/lib/logger"
-
-const prisma = new PrismaClient()
 
 async function main() {
   const roles = await prisma.role.createManyAndReturn({

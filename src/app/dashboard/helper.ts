@@ -1,6 +1,6 @@
 "use server"
 import { auth } from "@clerk/nextjs/server"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@projectforum/db"
 import { getRoleIdByRoleName } from "@projectforum/db/queries"
 // import { env } from "@projectforum/env"
 // import { Redis } from "@upstash/redis"
@@ -10,8 +10,6 @@ import { getRoleIdByRoleName } from "@projectforum/db/queries"
 //   url: env.NEXT_PUBLIC_REDIS_URL,
 //   token: env.NEXT_PUBLIC_REDIS_TOKEN
 // })
-
-const prisma = new PrismaClient()
 
 interface InviteCodeReturnJsonSuccess {
   isInviteCodeGenerated: boolean

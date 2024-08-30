@@ -5,10 +5,8 @@ import { env } from "@projectforum/env"
 import { createUserAfterSignUp } from "@projectforum/db/queries"
 
 import { logger } from "@projectforum/lib/logger"
-import { PrismaClient } from "@prisma/client"
+import { prisma } from "@projectforum/db"
 // import { redirect } from "next/navigation"
-
-const prisma = new PrismaClient()
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.WEBHOOK_SECRET

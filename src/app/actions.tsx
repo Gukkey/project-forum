@@ -6,13 +6,13 @@ import { redirect } from "next/navigation"
 import {
   returnHighestRoleWithPrivilege,
   getUserById,
-  getSectionIdByTopicId,
   createDiscussionThread,
   createNewRole,
   addRoleToUser,
   getRoleByName,
   deleteRoleFromUser,
-  createSection
+  createSection,
+  getTopicByTopicName
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
 
@@ -23,7 +23,7 @@ export async function createNewSection(formdata: FormData) {
   await createSection(data)
 }
 
-export async function createNewThread(text: string, topicId: string, formdata: FormData) {
+export async function createNewThread(text: string, topicName: string, formdata: FormData) {
   // Check if content is empty
   if (!text.trim()) {
     logger.error(" Content is empty ")
@@ -35,7 +35,8 @@ export async function createNewThread(text: string, topicId: string, formdata: F
     return // Exit the function early
   }
   // const topicId = formdata.get("topicId") as string
-  const sectionId = await getSectionIdByTopicId(topicId)
+  const topic = await getTopicByTopicName(topicName)
+  const sectionId = topic?.section_id
   const user = await currentUser()
   logger.debug(text)
   const name = formdata.get("title")
@@ -45,15 +46,17 @@ export async function createNewThread(text: string, topicId: string, formdata: F
     return
   }
   if (sectionId && user) {
+    const topicId = topic.id
+
     const data: Prisma.ThreadUncheckedCreateInput = {
       name: name as string,
       content: text,
-      section_id: sectionId.section_id,
+      section_id: sectionId,
       topic_id: topicId,
       user_id: user.id
     }
     await createDiscussionThread(data)
-    redirect(`/home/${topicId}`)
+    redirect(`/home/${topicName}`)
   }
 }
 

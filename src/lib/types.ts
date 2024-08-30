@@ -8,6 +8,7 @@ export type EditorContextType = {
   // setText : Dispatch<SetStateAction<boolean>>
   // eslint-disable-next-line no-unused-vars
   handleTextChange: (text: string) => void
+  clearText: () => void
 }
 
 export type InviteContextType = {

@@ -13,6 +13,7 @@ import {
   deleteRoleFromUser,
   createSection,
   getTopicByTopicName,
+  createNewReply,
   getDiscussionThread
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
@@ -61,16 +62,42 @@ export async function createNewThread(text: string, topicName: string, formdata:
   }
 }
 
+export async function createReply(
+  text: string,
+  threadId: string,
+  userId: string,
+  formData: FormData
+) {
+  // Check if content is empty
+  if (!text.trim()) {
+    logger.error(" Content is empty ")
+    return // Exit the function early
+  }
+
+  if (text === "<p></p>") {
+    logger.error(" Content is empty ")
+    return // Exit the function early
+  }
+  const data: Prisma.ReplyUncheckedCreateInput = {
+    content: text,
+    thread_id: threadId,
+    user_id: userId
+  }
+  logger.debug(formData.get("editor"))
+  await createNewReply(data)
+  // revalidatePath("/home/[topicName]/[threadName]")
+}
+
 export async function getUserRole() {
   const userId = auth().userId
   if (!userId) return null
 
   logger.debug(userId)
   const userData = await getUserById(userId)
-  logger.info(userData, "getUserRole() :: Current User")
+  logger.debug(`getUserRole() :: Current User ${userData?.id}`)
   if (userData) {
     const userPrivilegeData = await returnHighestRoleWithPrivilege(userData.id)
-    logger.debug(userPrivilegeData, "getUserRole():: userPrivilegeData")
+    logger.debug(userPrivilegeData, "getUserRole() :: userPrivilegeData")
     return userPrivilegeData
   }
   return null
@@ -131,7 +158,7 @@ export async function deleteRoleFromUserAction(user_id: string, roleName: string
 export async function getThread(name: string) {
   const result = await getDiscussionThread(name)
 
-  if (!result) {
+  if (result.length === 0) {
     notFound()
   } else return result
 }

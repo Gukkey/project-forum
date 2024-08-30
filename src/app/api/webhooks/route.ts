@@ -111,6 +111,7 @@ export async function POST(req: Request) {
       // await prisma.user.delete({ where: { id: userId } })
       return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 })
     }
+    prisma.$disconnect()
     // redirect("/")
   }
 

@@ -1,30 +1,49 @@
 import React from "react"
-import BBcode from "@bbob/react"
-import reactPreset from "@bbob/preset-react"
+
 import { getThread } from "@projectforum/app/actions"
+import { ContentCard } from "@projectforum/components/content-card"
+import { ReplyForm } from "@projectforum/components/reply-form"
+import { getRepliesByThread } from "@projectforum/db/queries"
 
 export default async function ThreadPage({
   params
 }: {
   params: { threadName: string; topicName: string }
 }) {
-  const thread = await getThread(params.threadName)
+  const resultSet = await getThread(params.threadName)
+  const thread = resultSet[0]
+
+  const repliesResultSet = await getRepliesByThread(thread.id)
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">
-      <div className="flex flex-col lg:flex-row">
-        <div className="flex-1 bg-gray-800 p-6 rounded-lg">
-          <div className="w-full text-left">
-            <div>
-              <h1 className="mb-2 text-2xl font-extrabold border-b border-gray-700">
-                {thread.name}
-              </h1>
-            </div>
-            <div>
-              <BBcode plugins={[reactPreset()]}>{thread.content}</BBcode>
-            </div>
-          </div>
+    <div className="min-h-screen  w-full bg-gray-900 text-gray-300 p-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 bg-gray-800  rounded-lg">
+          {thread && (
+            <ContentCard
+              name={thread.name}
+              content={thread.content}
+              timestamp={new Date(thread.created_at).toDateString()}
+              role={thread.role}
+              username={thread.username}
+            />
+          )}
         </div>
+        <div className="my-2">
+          {/* <ReplyForm threadId={thread.id} userId={thread.user_id} /> */}
+          <p className="italic">Replies to be implemented</p>
+        </div>
+        {repliesResultSet &&
+          repliesResultSet.length > 0 &&
+          repliesResultSet.map((reply) => (
+            <ContentCard
+              key={reply.id}
+              content={reply.content}
+              timestamp={new Date(reply.created_at).toDateString()}
+              role={reply.role}
+              username={reply.username}
+            />
+          ))}
       </div>
     </div>
   )

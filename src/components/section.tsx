@@ -1,4 +1,5 @@
 "use client"
+import { createRouteFromString } from "@projectforum/app/home/helper"
 import { SectionWithTopics } from "@projectforum/lib/types"
 import Link from "next/link"
 import React from "react"
@@ -29,7 +30,10 @@ export const Section = ({ sections }: { sections?: SectionWithTopics[] }) => {
                     section.topics.map((topic) => (
                       <tr key={topic.id} className="border-t">
                         <td className="py-2">
-                          <Link href={`home/${topic.id}`} className="text-blue-400 hover:underline">
+                          <Link
+                            href={`home/${createRouteFromString(topic.name)}`}
+                            className="text-blue-400 hover:underline"
+                          >
                             {topic.name}
                           </Link>
                         </td>

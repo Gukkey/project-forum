@@ -7,9 +7,9 @@ import { useContext } from "react"
 import { TipTapCore } from "./tiptap/tiptap-core"
 import { Input } from "@shadcn/input"
 
-export function CreateThreadForm({ topicId }: { topicId: string }) {
+export function CreateThreadForm({ topicName }: { topicName: string }) {
   const { text, handleTextChange } = useContext(EditorContext) as EditorContextType
-  const createNewThreadWithContent = createNewThread.bind(null, text, topicId)
+  const createNewThreadWithContent = createNewThread.bind(null, text, topicName)
   return (
     <div className="p-4 bg-gray-800 rounded-lg">
       <form action={createNewThreadWithContent}>

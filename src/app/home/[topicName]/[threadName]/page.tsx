@@ -6,11 +6,13 @@ import { getDiscussionThread } from "@projectforum/db/queries"
 export default async function ThreadPage({
   params
 }: {
-  params: { threadId: string; topicId: string }
+  params: { threadName: string; topicName: string }
 }) {
-  const threads = await getDiscussionThread(params.threadId)
+  const threads = await getDiscussionThread(params.threadName)
 
-  logger.debug(params.topicId)
+  logger.debug(
+    `params: thread name: ${params.threadName} topic name: ${params.topicName} threads len: ${threads.length}`
+  )
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">

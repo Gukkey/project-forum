@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma, Role } from "@prisma/client"
+import { logger } from "@projectforum/lib/logger"
 import { SectionWithTopics } from "@projectforum/lib/types"
 
 const prisma = new PrismaClient()
@@ -15,41 +16,60 @@ export async function createTopic(data: Prisma.TopicCreateInput) {
   return await prisma.topic.create({ data })
 }
 
-export async function getTopicById(topicId: string) {
-  return await prisma.topic.findUnique({ where: { id: topicId } })
-}
-
 export async function createDiscussionThread(data: Prisma.ThreadUncheckedCreateInput) {
+  logger.info(`userid: ${data.user_id}`)
   return await prisma.thread.create({ data })
 }
 
-export async function getAllDiscussionThreads(id: string) {
+export async function getAllDiscussionThreads(topicName: string) {
   return await prisma.thread.findMany({
-    select: {
-      id: true,
-      name: true,
-      content: true,
-      user: true
+    include: {
+      topic: true
     },
     where: {
-      topic_id: id
-    },
-    orderBy: {
-      updated_at: "desc"
+      topic: {
+        name: {
+          mode: "insensitive",
+          equals: topicName
+        }
+      }
     }
   })
 }
 
-export async function getLatestDiscussionThread(id: string) {
-  return await prisma.thread.findFirst({ where: { id }, orderBy: { updated_at: "desc" } })
+export async function getTopicByTopicName(topicName: string) {
+  return await prisma.topic.findFirst({
+    where: {
+      name: {
+        mode: "insensitive",
+        equals: topicName
+      }
+    }
+  })
 }
 
-export async function getDiscussionThread(id: string) {
-  return await prisma.thread.findMany({ where: { id } })
+export async function getDiscussionThread(threadName: string) {
+  threadName = threadName.replaceAll("-", " ")
+  logger.info(`thread name: ${threadName}`)
+  return await prisma.thread.findMany({
+    where: {
+      name: {
+        mode: "insensitive",
+        contains: threadName
+      }
+    }
+  })
 }
 
-export async function getSectionIdByTopicId(id: string) {
-  return await prisma.topic.findUnique({ select: { section_id: true }, where: { id } })
+export async function getSectionIdByTopicName(name: string) {
+  return await prisma.topic.findUnique({
+    select: {
+      section_id: true
+    },
+    where: {
+      name: name
+    }
+  })
 }
 
 export async function createCronJobLogs(data: Prisma.CronJobLogsCreateInput) {
@@ -75,10 +95,6 @@ export async function createNewRole(data: Prisma.RoleCreateInput) {
   return await prisma.role.create({ data })
 }
 
-// async function getAllRolesByUser(user_id: string) {
-//   return await prisma.user.findFirst({ select: { role_ids: true }, where: { id: user_id } })
-// }
-
 export async function addRoleToUser(data: { user_id: string; role_id: string }) {
   return await prisma.userRole.create({ data })
 }
@@ -87,25 +103,9 @@ export async function deleteRoleFromUser(data: { user_id: string; role_id: strin
   return await prisma.userRole.deleteMany({
     where: { role_id: data.user_id, user_id: data.user_id }
   })
-  // const rolesResult = await getAllRolesByUser(user_id)
-  // const roles = rolesResult?.role_ids ?? []
-
-  // if (roles.length == 0) {
-  //   throw new Error("This user does not have any roles")
-  // }
-
-  // const updatedRoles = roles.filter((r) => r != role_id)
-  // return await prisma.user.update({ where: { id: user_id }, data: { role_ids: updatedRoles } })
 }
 
 export async function returnHighestRoleWithPrivilege(userid: string) {
-  // const result = await prisma.$queryRaw<Role[]>`
-  //       select roles.name as name, roles.id as id, privilege from roles
-  //       inner join users on roles.id = ANY(users.role_ids)
-  //       where users.id = ${userid}
-  //       order by roles.privilege ASC
-  //       limit 1;
-  //       `
   const result = await prisma.$queryRaw<Pick<Role, "privilege">[]>`
           select
           b.privilege 
@@ -136,30 +136,6 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
     relationLoadStrategy: "join",
     select: { id: true, name: true, topics: { select: { id: true, name: true } } }
   })
-  // const query = await db
-  //   .select({
-  //     sectionId: sections.id,
-  //     sectionName: sections.name,
-  //     topicId: topics.id,
-  //     topicName: topics.name
-  //   })
-  //   .from(sections)
-  //   .innerJoin(topics, eq(sections.id, topics.sectionId))
-
-  // const groupedResults = query.reduce((arr, idx) => {
-  //   const section = arr.find((s) => s.id === idx.id)
-  //   if (section) {
-  //     section.topics.push({ id: idx.topicId, name: idx.topicName })
-  //   } else {
-  //     arr.push({
-  //       id: idx.sectionId,
-  //       name: idx.sectionName,
-  //       topics: [{ id: idx.topicId, name: idx.topicName }]
-  //     })
-  //   }
-  //   return arr
-  // }, [] as SectionWithTopics[])
-
   return query
 }
 
@@ -171,23 +147,5 @@ export async function getAllReplies(discussionThreadId: string) {
   return await prisma.reply.findMany({
     where: { thread_id: discussionThreadId },
     orderBy: { created_at: "desc" }
-  })
-}
-
-// write an query function to fetch topic name from topicId
-
-export async function getTopicName(topicId: string) {
-  return await prisma.topic.findUnique({
-    select: { name: true },
-    where: { id: topicId }
-  })
-}
-
-// write an query function to fetch thread name from threadId
-
-export async function getThreadName(threadId: string) {
-  return await prisma.thread.findUnique({
-    select: { name: true },
-    where: { id: threadId }
   })
 }

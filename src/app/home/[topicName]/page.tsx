@@ -1,10 +1,15 @@
-import { getAllDiscussionThreads, getTopicById } from "@projectforum/db/queries"
+import { getAllDiscussionThreads, getTopicByTopicName } from "@projectforum/db/queries"
 import Link from "next/link"
 import React from "react"
+import { createRouteFromString } from "../helper"
+import { logger } from "@projectforum/lib/logger"
 
-export default async function TopicPage({ params }: { params: { topicId: string } }) {
-  const threads = await getAllDiscussionThreads(params.topicId)
-  const topic = await getTopicById(params.topicId)
+export default async function TopicPage({ params }: { params: { topicName: string } }) {
+  const threads = await getAllDiscussionThreads(params.topicName)
+  logger.info(`Threads len: ${threads.length} topicName: ${params.topicName}`)
+  const topic = await getTopicByTopicName(params.topicName)
+  const result = topic?.name
+  const topicName = createRouteFromString(String(result))
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300">
@@ -18,7 +23,7 @@ export default async function TopicPage({ params }: { params: { topicId: string 
                   <div>
                     <div className="pb-2 border-b border-gray-700">
                       <div>
-                        <Link href={`/home/${params.topicId}/${thread.id}`}>
+                        <Link href={`/home/${topicName}/${createRouteFromString(thread.name)}`}>
                           <p className=" py-2 text-left text-lg">{thread.name}</p>
                         </Link>
                       </div>
@@ -34,7 +39,7 @@ export default async function TopicPage({ params }: { params: { topicId: string 
             <div className="mb-6">
               <h3 className="text-xl mb-4">Actions</h3>
               <Link
-                href={`/home/${params.topicId}/create`}
+                href={`/home/${topicName}/create`}
                 className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 mb-2 rounded"
               >
                 <button className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-2 mb-2 rounded">

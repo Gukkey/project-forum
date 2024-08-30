@@ -10,14 +10,14 @@ import {
 import { Slash } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import React from "react"
+import { Suspense } from "react"
 
 export default function Layout({
   children
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const pathname = usePathname().split("/").filter(Boolean)
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">
       <header className="bg-gray-650 p-4 flex justify-between items-center">
@@ -42,26 +42,31 @@ export default function Layout({
         </nav>
       </header>
       <div>
-        <Breadcrumb>
-          <BreadcrumbList>
-            <div className="flex flex-row mx-4 px-4 pt-4">
-              {pathname.map((item, idx, arr) => (
-                <div key={idx}>
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href={`/${arr.slice(0, idx + 1).join("/")}`}>
-                      {item}
-                    </BreadcrumbLink>
-                    <BreadcrumbSeparator>
-                      <Slash className="h-4 w-4 mx-1" />
-                    </BreadcrumbSeparator>
-                  </BreadcrumbItem>
-                </div>
-              ))}
-            </div>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <Suspense fallback={<div>Loading....</div>}>
+          <BreadCrumbComponent />
+        </Suspense>
       </div>
       {children}
     </div>
+  )
+}
+
+function BreadCrumbComponent() {
+  const pathname = usePathname().split("/").filter(Boolean)
+  return (
+    <Breadcrumb>
+      <BreadcrumbList className="mx-4 px-4 pt-4">
+        {pathname.map((item, idx, arr) => (
+          <React.Fragment key={idx}>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/${arr.slice(0, idx + 1).join("/")}`}>{item}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <Slash className="h-4 w-4 mx-1" />
+            </BreadcrumbSeparator>
+          </React.Fragment>
+        ))}
+      </BreadcrumbList>
+    </Breadcrumb>
   )
 }

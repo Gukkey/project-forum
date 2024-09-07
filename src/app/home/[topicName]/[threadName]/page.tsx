@@ -16,7 +16,7 @@ export default async function ThreadPage({
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">
-      <div className="flex flex-col lg:flex-row p-6">
+      <div className="flex flex-col lg:flex-row">
         <div className="flex-1 bg-gray-800 p-6 rounded-lg">
           {/* <h2 className="text-2xl mb-4">Thread page</h2> */}
           <div className="w-full text-left">

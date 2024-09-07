@@ -8,8 +8,8 @@ export const Section = ({ sections }: { sections?: SectionWithTopics[] }) => {
   const handleSectionClick = () => {}
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-300">
-      <div className="flex flex-col lg:flex-row p-6">
+    <div className="bg-gray-900 text-gray-300">
+      <div className="flex flex-col lg:flex-row">
         <div className="flex-1 bg-gray-800 p-6 rounded-lg">
           <table className="w-full text-left">
             {sections?.map((section) => (

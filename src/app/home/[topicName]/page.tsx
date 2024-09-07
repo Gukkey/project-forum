@@ -13,7 +13,7 @@ export default async function TopicPage({ params }: { params: { topicName: strin
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300">
-      <div className="flex flex-col lg:flex-row p-6">
+      <div className="flex flex-col lg:flex-row">
         <div className="flex-1 bg-gray-800 p-6 rounded-lg">
           <h2 className="text-2xl mb-4 font-extrabold">{topic?.name}</h2>
           {threads && (

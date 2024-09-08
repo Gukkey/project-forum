@@ -66,6 +66,8 @@ export async function createReply(
   text: string,
   threadId: string,
   userId: string,
+  threadName: string,
+  topicName: string,
   formData: FormData
 ) {
   // Check if content is empty
@@ -74,10 +76,6 @@ export async function createReply(
     return // Exit the function early
   }
 
-  if (text === "<p></p>") {
-    logger.error(" Content is empty ")
-    return // Exit the function early
-  }
   const data: Prisma.ReplyUncheckedCreateInput = {
     content: text,
     thread_id: threadId,
@@ -85,7 +83,7 @@ export async function createReply(
   }
   logger.debug(formData.get("editor"))
   await createNewReply(data)
-  // revalidatePath("/home/[topicName]/[threadName]")
+  redirect(`/home/${topicName}/${threadName}`)
 }
 
 export async function getUserRole() {

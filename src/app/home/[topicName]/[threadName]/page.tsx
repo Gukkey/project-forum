@@ -4,6 +4,7 @@ import { getThread } from "@projectforum/app/actions"
 import { ContentCard } from "@projectforum/components/content-card"
 import { ReplyForm } from "@projectforum/components/reply-form"
 import { getRepliesByThread } from "@projectforum/db/queries"
+import { auth } from "@clerk/nextjs/server"
 
 export default async function ThreadPage({
   params
@@ -12,6 +13,7 @@ export default async function ThreadPage({
 }) {
   const resultSet = await getThread(params.threadName)
   const thread = resultSet[0]
+  const userId = auth().userId
 
   const repliesResultSet = await getRepliesByThread(thread.id)
 
@@ -29,10 +31,7 @@ export default async function ThreadPage({
             />
           )}
         </div>
-        <div className="my-2">
-          {/* <ReplyForm threadId={thread.id} userId={thread.user_id} /> */}
-          <p className="italic">Replies to be implemented</p>
-        </div>
+
         {repliesResultSet &&
           repliesResultSet.length > 0 &&
           repliesResultSet.map((reply) => (
@@ -44,6 +43,15 @@ export default async function ThreadPage({
               username={reply.username}
             />
           ))}
+
+        {userId && (
+          <ReplyForm
+            threadId={thread.id}
+            userId={userId}
+            topicName={params.topicName}
+            threadName={params.threadName}
+          />
+        )}
       </div>
     </div>
   )

@@ -2,7 +2,7 @@
 
 import { logger } from "@projectforum/lib/logger"
 import { auth, currentUser } from "@clerk/nextjs/server"
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import {
   returnHighestRoleWithPrivilege,
   getUserById,
@@ -12,7 +12,8 @@ import {
   getRoleByName,
   deleteRoleFromUser,
   createSection,
-  getTopicByTopicName
+  getTopicByTopicName,
+  getDiscussionThread
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
 
@@ -125,4 +126,12 @@ export async function deleteRoleFromUserAction(user_id: string, roleName: string
 
   const { id: role_id } = requestedRole
   return deleteRoleFromUser({ user_id, role_id })
+}
+
+export async function getThread(name: string) {
+  const result = await getDiscussionThread(name)
+
+  if (!result) {
+    notFound()
+  } else return result
 }

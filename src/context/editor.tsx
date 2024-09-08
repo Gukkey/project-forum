@@ -11,7 +11,13 @@ export const EditorProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setText(text)
   }
 
+  const clearText = () => {
+    handleTextChange("")
+  }
+
   return (
-    <EditorContext.Provider value={{ text, handleTextChange }}>{children}</EditorContext.Provider>
+    <EditorContext.Provider value={{ text, handleTextChange, clearText }}>
+      {children}
+    </EditorContext.Provider>
   )
 }

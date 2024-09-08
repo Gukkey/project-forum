@@ -1,6 +1,6 @@
 import { EditorProvider } from "@projectforum/context/editor"
 
-export default function CreatePageLayout({
+export default function TopicPageLayout({
   children
 }: Readonly<{
   children: React.ReactNode

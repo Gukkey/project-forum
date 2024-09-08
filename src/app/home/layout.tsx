@@ -56,9 +56,11 @@ function BreadCrumbComponent() {
             <BreadcrumbItem>
               <BreadcrumbLink href={`/${arr.slice(0, idx + 1).join("/")}`}>{item}</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash className="h-4 w-4 mx-1" />
-            </BreadcrumbSeparator>
+            {idx !== pathname.length - 1 && (
+              <BreadcrumbSeparator>
+                <Slash className="h-4 w-4 mx-1" />
+              </BreadcrumbSeparator>
+            )}
           </React.Fragment>
         ))}
       </BreadcrumbList>

@@ -1,8 +1,8 @@
-import { PrismaClient, Prisma, Role } from "@prisma/client"
+import { Prisma, Role } from "@prisma/client"
 import { logger } from "@projectforum/lib/logger"
 import { SectionWithTopics } from "@projectforum/lib/types"
-
-const prisma = new PrismaClient()
+import { prisma } from "@projectforum/db"
+import { getThread, getReplies } from "@prisma/client/sql"
 
 export async function createSection(data: Prisma.SectionCreateInput) {
   return await prisma.section.create({ data })
@@ -49,16 +49,9 @@ export async function getTopicByTopicName(topicName: string) {
 }
 
 export async function getDiscussionThread(threadName: string) {
-  threadName = threadName.replaceAll("-", " ")
   logger.info(`thread name: ${threadName}`)
-  return await prisma.thread.findFirst({
-    where: {
-      name: {
-        mode: "insensitive",
-        contains: threadName
-      }
-    }
-  })
+  threadName = "%" + threadName.replaceAll("-", " ") + "%"
+  return await prisma.$queryRawTyped(getThread(threadName))
 }
 
 export async function getSectionIdByTopicName(name: string) {
@@ -72,6 +65,9 @@ export async function getSectionIdByTopicName(name: string) {
   })
 }
 
+export async function createNewReply(data: Prisma.ReplyUncheckedCreateInput) {
+  return await prisma.reply.create({ data })
+}
 export async function createCronJobLogs(data: Prisma.CronJobLogsCreateInput) {
   return await prisma.cronJobLogs.create({ data })
 }
@@ -139,13 +135,6 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
   return query
 }
 
-export async function insertReply(data: Prisma.ReplyCreateInput) {
-  return await prisma.reply.create({ data })
-}
-
-export async function getAllReplies(discussionThreadId: string) {
-  return await prisma.reply.findMany({
-    where: { thread_id: discussionThreadId },
-    orderBy: { created_at: "desc" }
-  })
+export async function getRepliesByThread(threadId: string) {
+  return await prisma.$queryRawTyped(getReplies(threadId))
 }

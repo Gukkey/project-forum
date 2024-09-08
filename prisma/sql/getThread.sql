@@ -1,4 +1,4 @@
--- @param {String} $1:id The id of the user
+-- @param {String} $1:title Title of the thread
 select
 	th.*,
 	u.name as username,
@@ -10,7 +10,7 @@ from
 	user_roles ur,
 	roles r
 where
-	th.user_id = u.id
+	lower(th.name) like $1
+	and th.user_id = u.id
 	and u.id = ur.user_id
-	and r.id = ur.role_id
-	and th.id::text = $1 ;
+	and r.id = ur.role_id;

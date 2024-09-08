@@ -51,7 +51,7 @@ export async function getTopicByTopicName(topicName: string) {
 export async function getDiscussionThread(threadName: string) {
   threadName = threadName.replaceAll("-", " ")
   logger.info(`thread name: ${threadName}`)
-  return await prisma.thread.findMany({
+  return await prisma.thread.findFirst({
     where: {
       name: {
         mode: "insensitive",

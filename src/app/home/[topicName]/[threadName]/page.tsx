@@ -1,36 +1,28 @@
-// import { getDiscussionThread } from "@projectforum/server/db/queries"
 import React from "react"
-import { logger } from "@projectforum/lib/logger"
-import { getDiscussionThread } from "@projectforum/db/queries"
+import BBcode from "@bbob/react"
+import reactPreset from "@bbob/preset-react"
+import { getThread } from "@projectforum/app/actions"
 
 export default async function ThreadPage({
   params
 }: {
   params: { threadName: string; topicName: string }
 }) {
-  const threads = await getDiscussionThread(params.threadName)
-
-  logger.debug(
-    `params: thread name: ${params.threadName} topic name: ${params.topicName} threads len: ${threads.length}`
-  )
+  const thread = await getThread(params.threadName)
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-300 flex flex-col">
       <div className="flex flex-col lg:flex-row">
         <div className="flex-1 bg-gray-800 p-6 rounded-lg">
-          {/* <h2 className="text-2xl mb-4">Thread page</h2> */}
           <div className="w-full text-left">
-            {threads &&
-              threads.map((thread) => (
-                <React.Fragment key={thread.id}>
-                  <div>
-                    <h1 className="mb-2 text-2xl font-extrabold border-b border-gray-700">
-                      {thread.name}
-                    </h1>
-                  </div>
-                  <div dangerouslySetInnerHTML={{ __html: thread.content }}></div>
-                </React.Fragment>
-              ))}
+            <div>
+              <h1 className="mb-2 text-2xl font-extrabold border-b border-gray-700">
+                {thread.name}
+              </h1>
+            </div>
+            <div>
+              <BBcode plugins={[reactPreset()]}>{thread.content}</BBcode>
+            </div>
           </div>
         </div>
       </div>

@@ -12,13 +12,26 @@ export async function getAllSections() {
   return await prisma.section.findMany({ select: { id: true, name: true } })
 }
 
-export async function createTopic(data: Prisma.TopicCreateInput) {
+export async function getSectionById(id: string) {
+  return await prisma.section.findUnique({ where: { id: id } })
+}
+
+export async function createTopic(data: Prisma.TopicUncheckedCreateInput) {
   return await prisma.topic.create({ data })
 }
 
 export async function createDiscussionThread(data: Prisma.ThreadUncheckedCreateInput) {
   logger.info(`userid: ${data.user_id}`)
   return await prisma.thread.create({ data })
+}
+
+export async function updateThread(data: Prisma.ThreadUncheckedUpdateInput) {
+  return await prisma.thread.update({
+    where: {
+      id: String(data.id)
+    },
+    data: data
+  })
 }
 
 export async function getAllDiscussionThreads(topicName: string) {

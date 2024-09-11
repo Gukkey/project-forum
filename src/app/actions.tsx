@@ -14,7 +14,9 @@ import {
   createSection,
   getTopicByTopicName,
   createNewReply,
-  getDiscussionThread
+  getDiscussionThread,
+  createTopic,
+  updateThreadTimeStamp
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
 
@@ -23,6 +25,14 @@ export async function createNewSection(formdata: FormData) {
     name: formdata.get("name") as string
   }
   await createSection(data)
+}
+
+export async function createNewTopic(formData: FormData) {
+  const data: Prisma.TopicUncheckedCreateInput = {
+    name: formData.get("name") as string,
+    section_id: formData.get("section_id") as string
+  }
+  await createTopic(data)
 }
 
 export async function createNewThread(text: string, topicName: string, formdata: FormData) {
@@ -76,6 +86,11 @@ export async function createReply(
     return // Exit the function early
   }
 
+  const threadData: Prisma.ThreadUncheckedUpdateInput = {
+    id: threadId,
+    updated_at: new Date().toISOString()
+  }
+
   const data: Prisma.ReplyUncheckedCreateInput = {
     content: text,
     thread_id: threadId,
@@ -83,6 +98,7 @@ export async function createReply(
   }
   logger.debug(formData.get("editor"))
   await createNewReply(data)
+  await updateThreadTimeStamp(threadData)
   redirect(`/home/${topicName}/${threadName}`)
 }
 

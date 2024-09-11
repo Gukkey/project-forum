@@ -25,14 +25,12 @@ export async function createDiscussionThread(data: Prisma.ThreadUncheckedCreateI
   return await prisma.thread.create({ data })
 }
 
-export async function updateThreadTimeStamp(data: Prisma.ThreadUncheckedUpdateInput) {
+export async function updateThread(data: Prisma.ThreadUncheckedUpdateInput) {
   return await prisma.thread.update({
     where: {
       id: String(data.id)
     },
-    data: {
-      updated_at: data.updated_at
-    }
+    data: data
   })
 }
 

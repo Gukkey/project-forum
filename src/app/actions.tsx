@@ -16,7 +16,7 @@ import {
   createNewReply,
   getDiscussionThread,
   createTopic,
-  updateThreadTimeStamp
+  updateThread
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
 
@@ -98,7 +98,7 @@ export async function createReply(
   }
   logger.debug(formData.get("editor"))
   await createNewReply(data)
-  await updateThreadTimeStamp(threadData)
+  await updateThread(threadData)
   redirect(`/home/${topicName}/${threadName}`)
 }
 

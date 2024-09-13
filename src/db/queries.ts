@@ -34,6 +34,89 @@ export async function updateThread(data: Prisma.ThreadUncheckedUpdateInput) {
   })
 }
 
+export async function getRecentPost(topicId: String) {
+  const mostRecentThread = await prisma.thread.findFirst({
+    select: {
+      id: true,
+      name: true
+    },
+    where: {
+      topic_id: String(topicId)
+    },
+    orderBy: {
+      updated_at: "desc"
+    }
+  })
+
+  if (!mostRecentThread) {
+    return {
+      id: null,
+      name: null,
+      repliedBy: null
+    }
+  }
+
+  const mostRecentReplyCreatedBy = await prisma.reply.findFirst({
+    select: {
+      user_id: true
+    },
+    where: {
+      thread_id: mostRecentThread?.id
+    },
+    orderBy: {
+      created_at: "desc"
+    }
+  })
+
+  const username = await prisma.user.findFirst({
+    select: {
+      name: true
+    },
+    where: {
+      id: mostRecentReplyCreatedBy?.user_id
+    }
+  })
+
+  return {
+    id: mostRecentThread?.id,
+    name: mostRecentThread?.name,
+    repliedBy: String(username?.name)
+  }
+}
+
+export async function getThreadAndRepliesCount(topicId: String) {
+  const threadCount = await prisma.thread.count({
+    where: {
+      topic_id: String(topicId)
+    }
+  })
+
+  if (threadCount === 0) {
+    return {
+      threadsCount: threadCount,
+      repliesCount: 0
+    }
+  }
+
+  const repliesCount = await prisma.thread.findMany({
+    select: {
+      _count: {
+        select: {
+          replies: true
+        }
+      }
+    },
+    where: {
+      topic_id: String(topicId)
+    }
+  })
+
+  return {
+    threadsCount: threadCount,
+    repliesCount: repliesCount[0]?._count.replies
+  }
+}
+
 export async function getAllDiscussionThreads(topicName: string) {
   return await prisma.thread.findMany({
     include: {
@@ -141,11 +224,63 @@ export async function getRoleByName(roleName: string) {
 }
 
 export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
+  interface Topic {
+    id: string
+    name: string
+    mostRecentThread?: {
+      id: string
+      name: string
+    }
+    mostRecentThreadCreatedBy: string
+    threadsCount?: number
+    repliesCount?: number
+  }
+
+  interface Section {
+    id: string
+    name: string
+    topics: Topic[]
+  }
+
+  const result: { sections: Section[] } = {
+    sections: []
+  }
+
   const query = await prisma.section.findMany({
     relationLoadStrategy: "join",
     select: { id: true, name: true, topics: { select: { id: true, name: true } } }
   })
-  return query
+
+  const sectionsPromises = query.map(async (section) => {
+    const topicsPromises = section.topics.map(async (topic) => {
+      const mostRecentThread = await getRecentPost(topic.id)
+      const threadAndRepliesCount = await getThreadAndRepliesCount(topic.id)
+
+      logger.debug(
+        `name: ${topic.name}, mostRecentThread: ${mostRecentThread.name}, mostRecentThreadCreatedBy: ${mostRecentThread.repliedBy}, threadsCount,: ${threadAndRepliesCount.threadsCount}, repliesCount: ${threadAndRepliesCount.repliesCount}`
+      )
+
+      return {
+        id: topic.id,
+        name: topic.name,
+        mostRecentThread: { id: String(mostRecentThread.id), name: String(mostRecentThread.name) },
+        mostRecentThreadCreatedBy: String(mostRecentThread.repliedBy),
+        threadsCount: Number(threadAndRepliesCount.threadsCount),
+        repliesCount: Number(threadAndRepliesCount.repliesCount)
+      }
+    })
+
+    const resolvedTopics = await Promise.all(topicsPromises)
+
+    return {
+      ...section,
+      topics: resolvedTopics
+    }
+  })
+
+  result.sections = await Promise.all(sectionsPromises)
+
+  return result.sections
 }
 
 export async function getRepliesByThread(threadId: string) {

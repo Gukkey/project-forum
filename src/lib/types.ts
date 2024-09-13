@@ -23,6 +23,13 @@ export type InviteContextType = {
 export type Topic = {
   id: string
   name: string
+  mostRecentThread?: {
+    id: string
+    name: string
+  }
+  mostRecentThreadCreatedBy: string
+  threadsCount?: number
+  repliesCount?: number
 }
 
 export type SectionWithTopics = {

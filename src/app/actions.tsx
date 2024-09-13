@@ -16,6 +16,7 @@ import {
   createNewReply,
   getDiscussionThread,
   createTopic,
+  getAllSections,
   updateThread
 } from "@projectforum/db/queries"
 import { Prisma } from "@prisma/client"
@@ -24,7 +25,8 @@ export async function createNewSection(formdata: FormData) {
   const data: Prisma.SectionCreateInput = {
     name: formdata.get("name") as string
   }
-  await createSection(data)
+  const dat = await createSection(data)
+  return dat.id
 }
 
 export async function createNewTopic(formData: FormData) {
@@ -100,6 +102,11 @@ export async function createReply(
   await createNewReply(data)
   await updateThread(threadData)
   redirect(`/home/${topicName}/${threadName}`)
+}
+
+export async function getSectionsall() {
+  const sections = await getAllSections()
+  return sections
 }
 
 export async function getUserRole() {

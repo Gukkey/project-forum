@@ -57,8 +57,13 @@ export async function getRecentPost(topicId: String) {
   }
 
   const mostRecentReplyCreatedBy = await prisma.reply.findFirst({
-    select: {
-      user_id: true
+    relationLoadStrategy: "join",
+    include: {
+      users: {
+        select: {
+          name: true
+        }
+      }
     },
     where: {
       thread_id: mostRecentThread?.id
@@ -68,19 +73,18 @@ export async function getRecentPost(topicId: String) {
     }
   })
 
-  const username = await prisma.user.findFirst({
-    select: {
-      name: true
-    },
-    where: {
-      id: mostRecentReplyCreatedBy?.user_id
+  if (!mostRecentReplyCreatedBy?.id) {
+    return {
+      id: mostRecentThread?.id,
+      name: mostRecentThread?.name,
+      repliedBy: null
     }
-  })
-
-  return {
-    id: mostRecentThread?.id,
-    name: mostRecentThread?.name,
-    repliedBy: String(username?.name)
+  } else {
+    return {
+      id: mostRecentThread?.id,
+      name: mostRecentThread?.name,
+      repliedBy: mostRecentReplyCreatedBy?.users.name
+    }
   }
 }
 
@@ -254,6 +258,8 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
   const sectionsPromises = query.map(async (section) => {
     const topicsPromises = section.topics.map(async (topic) => {
       const mostRecentThread = await getRecentPost(topic.id)
+      // console.log('Topic:', topic.id);
+      // console.dir(mostRecentThread, { depth: null });
       const threadAndRepliesCount = await getThreadAndRepliesCount(topic.id)
 
       logger.debug(

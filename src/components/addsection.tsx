@@ -52,11 +52,15 @@ function AddSection() {
         createNewTopic(tempForm)
       })
     }
-    setCreated(true)
+    if (!(section === "") || !(topics.length === 0)) {
+      setCreated(true)
+    }
     setTimeout(() => {
       setCreated(false)
     }, 2000)
     toast({ title: "Your section has been added" })
+    setSection("")
+    setTopics([])
   }
 
   const handleSelectSection = (sec: any) => {
@@ -171,7 +175,7 @@ function AddSection() {
         </div>
 
         {created && (
-          <div>
+          <div className="mt-2 border-2 p-2 rounded-lg bg-green-500">
             {adding === "topics"
               ? "Topics added successfully"
               : "Section and Topics added successfully"}

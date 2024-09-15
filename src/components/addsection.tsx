@@ -90,11 +90,10 @@ function AddSection() {
     <div className="p-3 pl-6">
       <h1 className="text-lg font-bold h-20 text-white">Add Section/Topic</h1>
       <div className="w-full h-80 flex items-center flex-col justify-center">
-        <div className="text-lg mb-3 transition-all duration-200 w-full flex justify-between ease-in-out">
+        <div className="text-base  mb-3 transition-all duration-200 w-full flex justify-between items-center ease-in-out">
           What do you want to create?
           <ComboBox comboValues={values} onValueChange={handleAdding} value={adding}></ComboBox>
         </div>
-
         <div className="w-full">
           <div className="text-center mb-3">
             {adding === "topics" ? "Add Topics" : "Add Section"}

@@ -17,17 +17,29 @@ function AddSection() {
   const [topic, setTopic] = useState("")
   const [adding, setAdding] = useState("section")
   const [searchTerm, setSearchTerm] = useState("")
+  const [allSections, setAllSections] = useState<{ id: string; name: string }[]>([])
   const [filteredSections, setFilteredSections] = useState<{ id: string; name: string }[]>([])
   const [created, setCreated] = useState(false)
 
-  const allSections = async () => {
+  const fetchSections = async () => {
     const temp = await getSectionsall()
-    setFilteredSections(temp)
+    setAllSections(temp)
   }
 
   useEffect(() => {
-    allSections()
+    fetchSections()
   }, [created])
+
+  // Filter sections based on the searchTerm
+  useEffect(() => {
+    if (searchTerm) {
+      setFilteredSections(
+        allSections.filter((s) => s.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    } else {
+      setFilteredSections(allSections)
+    }
+  }, [searchTerm, allSections])
 
   const isAnyId = (sec: string) => {
     if (!section) return false
@@ -112,7 +124,7 @@ function AddSection() {
                   className="mb-0 border-sky-900"
                   placeholder="Search for a section..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value.trim())}
                 />
                 {filteredSections.length > 0 && searchTerm.length > 0 && (
                   <ul className="absolute w-full bg-black text-white border border-sky-900 rounded-lg mt-0 max-h-40 overflow-y-auto">

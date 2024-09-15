@@ -170,7 +170,9 @@ function AddSection() {
             </ul>
           </div>
           <div className="flex justify-center mt-4">
-            <Button onClick={handleAddSection}>+ Add</Button>
+            <Button disabled={topics.length === 0 || section === ""} onClick={handleAddSection}>
+              + Add
+            </Button>
           </div>
         </div>
 

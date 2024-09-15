@@ -27,7 +27,7 @@ function AddSection() {
 
   useEffect(() => {
     allSections()
-  }, [])
+  }, [created])
 
   const isAnyId = (sec: string) => {
     if (!section) return false

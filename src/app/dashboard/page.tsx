@@ -8,7 +8,7 @@ import { Role } from "../../lib/enums"
 import { logger } from "@projectforum/lib/logger"
 import * as ToggleGroup from "@radix-ui/react-toggle-group"
 import { SignOutButton } from "@clerk/nextjs"
-import Addsection from "../../components/addsection"
+import Addsection from "../../components/AddSection"
 
 async function checkUserRole() {
   const currentlyLoggedInUserRole = await getUserRole()

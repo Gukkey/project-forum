@@ -1,8 +1,17 @@
 "use client"
 import React, { useEffect, useState } from "react"
-import * as Dialog from "@radix-ui/react-dialog"
-import { Cross2Icon } from "@radix-ui/react-icons"
 import { createNewSection, createNewTopic, getSectionsall } from "@projectforum/app/actions"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+  DialogPortal,
+  DialogOverlay
+} from "@projectforum/components/shadcn/dialog"
+import { Button } from "@shadcn/button"
 
 function AddSection() {
   const [isOpen, setOpen] = useState(false)
@@ -60,7 +69,6 @@ function AddSection() {
         setTopic("")
       }
     }
-    console.log(topics)
   }
 
   const handleAdding = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -106,34 +114,19 @@ function AddSection() {
         </div>
         <div className="flex">
           {adding === "topic" && (
-            <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-              <Dialog.Trigger asChild>
-                <button className="bg-sky-500 text-white p-2 rounded-md hover:bg-sky-900 transition duration-200 ease-in-out w-50 h-8 flex items-center text-center">
-                  + Add Topics
-                </button>
-              </Dialog.Trigger>
-              <Dialog.Portal>
-                <Dialog.Overlay className="DialogOverlay fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out" />
-                <Dialog.Content
-                  className="DialogContent fixed bg-white pr-3 pl-3 pb-3 text-gray-800 w-4/12 h-auto z-auto shadow-lg shadow-sky-900 rounded-lg transform transition-transform duration-300 ease-in-out"
-                  style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)" }}
-                >
-                  <div className="flex justify-between w-full items-center ">
-                    <Dialog.Title className="DialogTitle mb-3 mt-2 text-xl font-semibold">
-                      Add Topics
-                    </Dialog.Title>
-                    <Dialog.Close asChild>
-                      <button
-                        className="IconButton text-sky-600 hover:shadow-sky-900 transition-colors duration-200 ease-in-out"
-                        aria-label="Close"
-                      >
-                        <Cross2Icon />
-                      </button>
-                    </Dialog.Close>
-                  </div>
-                  <Dialog.Description className="DialogDescription mb-4 text-sm text-gray-500">
+            <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+              <DialogTrigger asChild>
+                <Button>+ Add Topics</Button>
+              </DialogTrigger>
+              <DialogPortal>
+                <DialogOverlay />
+                <DialogContent>
+                  <DialogTitle className="DialogTitle mb-3 mt-2 text-xl font-semibold">
+                    Add Topics
+                  </DialogTitle>
+                  <DialogDescription className="DialogDescription mb-4 text-sm text-gray-500">
                     Add the topics to the section.
-                  </Dialog.Description>
+                  </DialogDescription>
                   <fieldset className="Fieldset w-full items-baseline flex mb-4">
                     <label className="Label w-1/4 text-sm text-gray-600" htmlFor="name">
                       Select Section
@@ -168,7 +161,7 @@ function AddSection() {
                       value={topic}
                     />
                   </fieldset>
-                  <div className="mb-4">
+                  <div className="mb-0">
                     <ul className="list-none flex flex-wrap gap-2">
                       {topics.map((topic, index) => (
                         <li
@@ -187,48 +180,29 @@ function AddSection() {
                     </ul>
                   </div>
                   <div className="flex justify-center mt-4">
-                    <Dialog.Close asChild>
-                      <button
-                        onClick={handleAddSection}
-                        className="bg-sky-500 text-white p-2 rounded-md hover:bg-sky-800 transition duration-200 ease-in-out"
-                      >
-                        + Add
-                      </button>
-                    </Dialog.Close>
+                    <DialogClose asChild>
+                      <Button onClick={handleAddSection}>+ Add</Button>
+                    </DialogClose>
                   </div>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+                </DialogContent>
+              </DialogPortal>
+            </Dialog>
           )}
           {adding === "section" && (
-            <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-              <Dialog.Trigger asChild>
-                <button className="bg-sky-500 text-white p-2 rounded-md hover:bg-sky-900 transition duration-200 ease-in-out w-50 h-8 flex items-center text-center">
-                  + Add Section
-                </button>
-              </Dialog.Trigger>
-              <Dialog.Portal>
-                <Dialog.Overlay className="DialogOverlay fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out" />
-                <Dialog.Content
-                  className="DialogContent fixed bg-white pr-3 pl-3 pb-3 text-gray-800 w-4/12 h-auto z-auto shadow-lg shadow-sky-900 rounded-lg transform transition-transform duration-300 ease-in-out"
-                  style={{ top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)" }}
-                >
-                  <div className="flex justify-between w-full items-center ">
-                    <Dialog.Title className="DialogTitle mb-3 mt-2 text-xl font-semibold">
-                      Add Section
-                    </Dialog.Title>
-                    <Dialog.Close asChild>
-                      <button
-                        className="IconButton text-sky-600 hover:shadow-sky-900 transition-colors duration-200 ease-in-out"
-                        aria-label="Close"
-                      >
-                        <Cross2Icon />
-                      </button>
-                    </Dialog.Close>
-                  </div>
-                  <Dialog.Description className="DialogDescription mb-4 text-sm text-gray-500">
+            <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+              <DialogTrigger asChild>
+                <Button>+ Add Section</Button>
+              </DialogTrigger>
+              <DialogPortal>
+                <DialogOverlay />
+                <DialogContent>
+                  <DialogTitle className="DialogTitle mb-3 mt-2 text-xl font-semibold">
+                    Add Section
+                  </DialogTitle>
+
+                  <DialogDescription className="DialogDescription mb-4 text-sm text-gray-500">
                     Add the sections and topics needed.
-                  </Dialog.Description>
+                  </DialogDescription>
                   <fieldset className="Fieldset w-full items-baseline flex mb-4">
                     <label className="Label w-1/4 text-sm text-gray-600" htmlFor="name">
                       Section Name
@@ -254,11 +228,11 @@ function AddSection() {
                       value={topic}
                     />
                   </fieldset>
-                  <div className="mb-4">
+                  <div className="mb-0">
                     <ul className="list-none flex flex-wrap gap-2">
                       {topics.map((topic, index) => (
                         <li
-                          className="flex items-center gap-2 bg-sky-900 px-3 py-1 rounded-md text-white"
+                          className="flex items-center gap-2 bg-sky-900 px-3 py-1  rounded-md text-white"
                           key={index}
                         >
                           {topic}
@@ -273,18 +247,13 @@ function AddSection() {
                     </ul>
                   </div>
                   <div className="flex justify-center mt-4">
-                    <Dialog.Close asChild>
-                      <button
-                        onClick={handleAddSection}
-                        className="bg-sky-500 text-white p-2 rounded-md hover:bg-sky-800 transition duration-200 ease-in-out"
-                      >
-                        + Add
-                      </button>
-                    </Dialog.Close>
+                    <DialogClose asChild>
+                      <Button onClick={handleAddSection}>+ Add</Button>
+                    </DialogClose>
                   </div>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+                </DialogContent>
+              </DialogPortal>
+            </Dialog>
           )}
         </div>
       </div>

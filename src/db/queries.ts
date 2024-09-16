@@ -2,12 +2,7 @@ import { Prisma, Role } from "@prisma/client"
 import { logger } from "@projectforum/lib/logger"
 import { SectionWithTopics } from "@projectforum/lib/types"
 import { prisma } from "@projectforum/db"
-import {
-  getThread,
-  getReplies,
-  getMostRecentThread,
-  getThreadsAndRepliesCount
-} from "@prisma/client/sql"
+import { getThread, getReplies, getFrontPageStats } from "@prisma/client/sql"
 
 export async function createSection(data: Prisma.SectionCreateInput) {
   return await prisma.section.create({ data })
@@ -37,14 +32,6 @@ export async function updateThread(data: Prisma.ThreadUncheckedUpdateInput) {
     },
     data: data
   })
-}
-
-export async function getRecentPost(topicId: string) {
-  return await prisma.$queryRawTyped(getMostRecentThread(topicId))
-}
-
-export async function getThreadAndRepliesCount(topicId: string) {
-  return prisma.$queryRawTyped(getThreadsAndRepliesCount(topicId))
 }
 
 export async function getAllDiscussionThreads(topicName: string) {
@@ -184,23 +171,20 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
 
   const sectionsPromises = query.map(async (section) => {
     const topicsPromises = section.topics.map(async (topic) => {
-      const mostRecentThread = await getRecentPost(topic.id)
-      const threadAndRepliesCount = await getThreadAndRepliesCount(topic.id)
-
+      const frontPageStats = await prisma.$queryRawTyped(getFrontPageStats(topic.id))
       logger.debug(
-        `name: ${topic.name}, mostRecentThread: ${mostRecentThread[0]?.name ?? null}, mostRecentThreadCreatedBy: ${mostRecentThread[0]?.repliedby ?? null}, threadsCount,: ${threadAndRepliesCount[0].threadcount}, repliesCount: ${threadAndRepliesCount[0].repliescount}`
+        `name: ${topic.name}, mostRecentThread: ${frontPageStats[0]?.latest_thread_name ?? null}, mostRecentThreadCreatedBy: ${frontPageStats[0]?.last_replied_by ?? null}, threadsCount: ${frontPageStats[0]?.thread_count ?? 0}, repliesCount: ${frontPageStats[0]?.reply_count ?? 0}`
       )
-
       return {
         id: topic.id,
         name: topic.name,
         mostRecentThread: {
-          id: mostRecentThread[0]?.id ?? null,
-          name: mostRecentThread[0]?.name ?? null
+          id: frontPageStats[0]?.latest_thread_id ?? null,
+          name: frontPageStats[0]?.latest_thread_name ?? null
         },
-        mostRecentThreadCreatedBy: mostRecentThread[0]?.repliedby ?? null,
-        threadsCount: Number(threadAndRepliesCount[0].threadcount),
-        repliesCount: Number(threadAndRepliesCount[0].repliescount)
+        mostRecentThreadCreatedBy: frontPageStats[0]?.last_replied_by ?? null,
+        threadsCount: Number(frontPageStats[0]?.thread_count ?? 0),
+        repliesCount: Number(frontPageStats[0]?.reply_count ?? 0)
       }
     })
 

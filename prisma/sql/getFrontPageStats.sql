@@ -13,7 +13,8 @@ latest_thread AS (
     SELECT 
         t.id AS thread_id,
         t.name AS thread_name,
-        t.updated_at AS thread_updated_at
+        t.updated_at AS thread_updated_at,
+        t.user_id AS thread_created_by
     FROM 
         threads t
     WHERE 
@@ -25,7 +26,7 @@ latest_thread AS (
 latest_reply AS (
     SELECT 
         r.thread_id,
-        r.user_id,
+        r.user_id AS reply_user_id,
         r.created_at
     FROM 
         replies r
@@ -38,14 +39,18 @@ latest_reply AS (
 SELECT 
     lt.thread_id AS latest_thread_id,
     lt.thread_name AS latest_thread_name,
-    u.name AS last_replied_by,
-    tc.thread_count,
-    tc.reply_count
+    tc_user.id AS latest_thread_created_by,
+    tc_user.name AS latest_thread_creator_name,
+    lr_user.name AS last_replied_by,
+    tcount.thread_count,
+    tcount.reply_count
 FROM 
     latest_thread lt
 LEFT JOIN 
     latest_reply lr ON lt.thread_id = lr.thread_id
 LEFT JOIN 
-    users u ON lr.user_id = u.id
+    users lr_user ON lr.reply_user_id = lr_user.id
+LEFT JOIN 
+    users tc_user ON lt.thread_created_by = tc_user.id
 CROSS JOIN 
-    thread_counts tc;
+    thread_counts tcount;

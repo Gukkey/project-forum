@@ -173,7 +173,7 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
     const topicsPromises = section.topics.map(async (topic) => {
       const frontPageStats = await prisma.$queryRawTyped(getFrontPageStats(topic.id))
       logger.debug(
-        `name: ${topic.name}, mostRecentThread: ${frontPageStats[0]?.latest_thread_name ?? null}, mostRecentThreadCreatedBy: ${frontPageStats[0]?.last_replied_by ?? null}, threadsCount: ${frontPageStats[0]?.thread_count ?? 0}, repliesCount: ${frontPageStats[0]?.reply_count ?? 0}`
+        `name: ${topic.name}, mostRecentThread: ${frontPageStats[0]?.latest_thread_name ?? null}, mostRecentThreadCreatedBy: ${frontPageStats[0]?.last_replied_by ?? frontPageStats[0]?.latest_thread_creator_name ?? null}, threadsCount: ${frontPageStats[0]?.thread_count ?? 0}, repliesCount: ${frontPageStats[0]?.reply_count ?? 0}`
       )
       return {
         id: topic.id,
@@ -182,7 +182,10 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
           id: frontPageStats[0]?.latest_thread_id ?? null,
           name: frontPageStats[0]?.latest_thread_name ?? null
         },
-        mostRecentThreadCreatedBy: frontPageStats[0]?.last_replied_by ?? null,
+        mostRecentThreadCreatedBy:
+          frontPageStats[0]?.last_replied_by ??
+          frontPageStats[0]?.latest_thread_creator_name ??
+          null,
         threadsCount: Number(frontPageStats[0]?.thread_count ?? 0),
         repliesCount: Number(frontPageStats[0]?.reply_count ?? 0)
       }

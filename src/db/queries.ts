@@ -63,7 +63,7 @@ export async function getTopicByTopicName(topicName: string) {
 
 export async function getDiscussionThread(threadName: string) {
   logger.info(`thread name: ${threadName}`)
-  threadName = "%" + threadName.replaceAll("-", " ") + "%"
+  threadName = threadName.replaceAll("-", " ")
   return await prisma.$queryRawTyped(getThread(threadName))
 }
 

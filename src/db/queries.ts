@@ -212,7 +212,7 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
       const threadAndRepliesCount = await getThreadAndRepliesCount(topic.id)
 
       logger.debug(
-        `name: ${topic.name}, mostRecentThread: ${mostRecentThread[0]?.name ?? null}, mostRecentThreadCreatedBy: ${mostRecentThread[0]?.repliedby}, threadsCount,: ${threadAndRepliesCount.threadsCount}, repliesCount: ${threadAndRepliesCount.repliesCount}`
+        `name: ${topic.name}, mostRecentThread: ${mostRecentThread[0]?.name ?? null}, mostRecentThreadCreatedBy: ${mostRecentThread[0]?.repliedby ?? null}, threadsCount,: ${threadAndRepliesCount.threadsCount}, repliesCount: ${threadAndRepliesCount.repliesCount}`
       )
 
       return {

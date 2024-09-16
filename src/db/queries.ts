@@ -2,7 +2,12 @@ import { Prisma, Role } from "@prisma/client"
 import { logger } from "@projectforum/lib/logger"
 import { SectionWithTopics } from "@projectforum/lib/types"
 import { prisma } from "@projectforum/db"
-import { getThread, getReplies, getMostRecentThread } from "@prisma/client/sql"
+import {
+  getThread,
+  getReplies,
+  getMostRecentThread,
+  getThreadsAndRepliesCount
+} from "@prisma/client/sql"
 
 export async function createSection(data: Prisma.SectionCreateInput) {
   return await prisma.section.create({ data })
@@ -39,36 +44,7 @@ export async function getRecentPost(topicId: string) {
 }
 
 export async function getThreadAndRepliesCount(topicId: string) {
-  const threadCount = await prisma.thread.count({
-    where: {
-      topic_id: topicId
-    }
-  })
-
-  if (threadCount === 0) {
-    return {
-      threadsCount: threadCount,
-      repliesCount: 0
-    }
-  }
-
-  const repliesCount = await prisma.thread.findMany({
-    select: {
-      _count: {
-        select: {
-          replies: true
-        }
-      }
-    },
-    where: {
-      topic_id: topicId
-    }
-  })
-
-  return {
-    threadsCount: threadCount,
-    repliesCount: repliesCount[0]?._count.replies
-  }
+  return prisma.$queryRawTyped(getThreadsAndRepliesCount(topicId))
 }
 
 export async function getAllDiscussionThreads(topicName: string) {
@@ -212,7 +188,7 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
       const threadAndRepliesCount = await getThreadAndRepliesCount(topic.id)
 
       logger.debug(
-        `name: ${topic.name}, mostRecentThread: ${mostRecentThread[0]?.name ?? null}, mostRecentThreadCreatedBy: ${mostRecentThread[0]?.repliedby ?? null}, threadsCount,: ${threadAndRepliesCount.threadsCount}, repliesCount: ${threadAndRepliesCount.repliesCount}`
+        `name: ${topic.name}, mostRecentThread: ${mostRecentThread[0]?.name ?? null}, mostRecentThreadCreatedBy: ${mostRecentThread[0]?.repliedby ?? null}, threadsCount,: ${threadAndRepliesCount[0].threadcount}, repliesCount: ${threadAndRepliesCount[0].repliescount}`
       )
 
       return {
@@ -223,8 +199,8 @@ export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
           name: mostRecentThread[0]?.name ?? null
         },
         mostRecentThreadCreatedBy: mostRecentThread[0]?.repliedby ?? null,
-        threadsCount: threadAndRepliesCount.threadsCount,
-        repliesCount: threadAndRepliesCount.repliesCount
+        threadsCount: Number(threadAndRepliesCount[0].threadcount),
+        repliesCount: Number(threadAndRepliesCount[0].repliescount)
       }
     })
 

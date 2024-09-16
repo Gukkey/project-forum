@@ -2,7 +2,7 @@ import { Prisma, Role } from "@prisma/client"
 import { logger } from "@projectforum/lib/logger"
 import { SectionWithTopics } from "@projectforum/lib/types"
 import { prisma } from "@projectforum/db"
-import { getThread, getReplies } from "@prisma/client/sql"
+import { getThread, getReplies, getFrontPageStats } from "@prisma/client/sql"
 
 export async function createSection(data: Prisma.SectionCreateInput) {
   return await prisma.section.create({ data })
@@ -141,11 +141,71 @@ export async function getRoleByName(roleName: string) {
 }
 
 export async function getSectionsWithTopics(): Promise<SectionWithTopics[]> {
+  const startTime = performance.now()
+  interface Topic {
+    id: string
+    name: string
+    mostRecentThread?: {
+      id: string
+      name: string
+    }
+    mostRecentThreadCreatedBy: string
+    threadsCount: number
+    repliesCount: number
+  }
+
+  interface Section {
+    id: string
+    name: string
+    topics: Topic[]
+  }
+
+  const result: { sections: Section[] } = {
+    sections: []
+  }
+
   const query = await prisma.section.findMany({
     relationLoadStrategy: "join",
     select: { id: true, name: true, topics: { select: { id: true, name: true } } }
   })
-  return query
+
+  const sectionsPromises = query.map(async (section) => {
+    const topicsPromises = section.topics.map(async (topic) => {
+      const frontPageStats = await prisma.$queryRawTyped(getFrontPageStats(topic.id))
+      logger.debug(
+        `name: ${topic.name}, mostRecentThread: ${frontPageStats[0]?.latest_thread_name ?? null}, mostRecentThreadCreatedBy: ${frontPageStats[0]?.last_replied_by ?? frontPageStats[0]?.latest_thread_creator_name ?? null}, threadsCount: ${frontPageStats[0]?.thread_count ?? 0}, repliesCount: ${frontPageStats[0]?.reply_count ?? 0}`
+      )
+      return {
+        id: topic.id,
+        name: topic.name,
+        mostRecentThread: {
+          id: frontPageStats[0]?.latest_thread_id ?? null,
+          name: frontPageStats[0]?.latest_thread_name ?? null
+        },
+        mostRecentThreadCreatedBy:
+          frontPageStats[0]?.last_replied_by ??
+          frontPageStats[0]?.latest_thread_creator_name ??
+          null,
+        threadsCount: Number(frontPageStats[0]?.thread_count ?? 0),
+        repliesCount: Number(frontPageStats[0]?.reply_count ?? 0)
+      }
+    })
+
+    const resolvedTopics = await Promise.all(topicsPromises)
+
+    return {
+      ...section,
+      topics: resolvedTopics
+    }
+  })
+
+  result.sections = await Promise.all(sectionsPromises)
+
+  const endTime = performance.now()
+
+  logger.info(`Time took to load front page: ${endTime - startTime}`)
+
+  return result.sections
 }
 
 export async function getRepliesByThread(threadId: string) {

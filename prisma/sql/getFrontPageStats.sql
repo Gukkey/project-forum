@@ -1,56 +1,68 @@
 WITH thread_counts AS (
-    SELECT 
+    SELECT
+        t.topic_id,
         COUNT(DISTINCT t.id) AS thread_count,
         COUNT(r.id) AS reply_count
-    FROM 
+    FROM
         threads t
-    LEFT JOIN 
+    LEFT JOIN
         replies r ON t.id = r.thread_id
-    WHERE 
-        t.topic_id = $1::uuid
+    GROUP BY
+        t.topic_id
 ),
-latest_thread AS (
-    SELECT 
-        t.id AS thread_id,
-        t.name AS thread_name,
-        t.updated_at AS thread_updated_at,
-        t.user_id AS thread_created_by
-    FROM 
+latest_thread_per_topic AS (
+    SELECT
+        t.topic_id,
+        t.id AS latest_thread_id,
+        t.name AS latest_thread_name,
+        t.updated_at AS latest_thread_updated_at,
+        u.name AS latest_thread_created_by,
+        ROW_NUMBER() OVER (PARTITION BY t.topic_id ORDER BY t.updated_at DESC) AS rn
+    FROM
         threads t
-    WHERE 
-        t.topic_id = $1::uuid
-    ORDER BY 
-        t.updated_at DESC
-    LIMIT 1
+    JOIN
+        users u ON t.user_id = u.id
 ),
-latest_reply AS (
-    SELECT 
+latest_reply_per_thread AS (
+    SELECT
         r.thread_id,
-        r.user_id AS reply_user_id,
-        r.created_at
-    FROM 
+        u.name AS last_reply_by,
+        ROW_NUMBER() OVER (PARTITION BY r.thread_id ORDER BY r.created_at DESC) AS rn
+    FROM
         replies r
-    WHERE 
-        r.thread_id = (SELECT thread_id FROM latest_thread)
-    ORDER BY 
-        r.created_at DESC
-    LIMIT 1
+    JOIN
+        users u ON r.user_id = u.id
+),
+section_topic_info AS (
+    SELECT
+        s.id AS section_id,
+        s.name AS section_name,
+        t.id AS topic_id,
+        t.name AS topic_name
+    FROM
+        sections s
+    JOIN
+        topics t ON t.section_id = s.id
 )
-SELECT 
-    lt.thread_id AS latest_thread_id,
-    lt.thread_name AS latest_thread_name,
-    tc_user.id AS latest_thread_created_by,
-    tc_user.name AS latest_thread_creator_name,
-    lr_user.name AS last_replied_by,
-    tcount.thread_count,
-    tcount.reply_count
-FROM 
-    latest_thread lt
-LEFT JOIN 
-    latest_reply lr ON lt.thread_id = lr.thread_id
-LEFT JOIN 
-    users lr_user ON lr.reply_user_id = lr_user.id
-LEFT JOIN 
-    users tc_user ON lt.thread_created_by = tc_user.id
-CROSS JOIN 
-    thread_counts tcount;
+SELECT
+    sti.section_id,
+    sti.section_name,
+    sti.topic_id,
+    sti.topic_name,
+    lt.latest_thread_id,
+    lt.latest_thread_name,
+    -- lt.latest_thread_updated_at,
+    lt.latest_thread_created_by,
+    lr.last_reply_by,
+    tc.thread_count,
+    tc.reply_count
+FROM
+    section_topic_info sti
+LEFT JOIN
+    (SELECT * FROM latest_thread_per_topic WHERE rn = 1) lt ON sti.topic_id = lt.topic_id
+LEFT JOIN
+    (SELECT * FROM latest_reply_per_thread WHERE rn = 1) lr ON lt.latest_thread_id = lr.thread_id
+LEFT JOIN
+    thread_counts tc ON sti.topic_id = tc.topic_id
+ORDER BY
+    sti.section_id, sti.topic_id;

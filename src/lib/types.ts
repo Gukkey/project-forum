@@ -26,8 +26,8 @@ export type Topic = {
   mostRecentThread?: {
     id: string
     name: string
+    repliedOrCreatedBy: string
   }
-  mostRecentThreadCreatedBy: string
   threadsCount?: number
   repliesCount?: number
 }
